@@ -1,0 +1,351 @@
+<div class="bg-background text-on-background font-body min-h-screen flex flex-col md:flex-row w-full">
+<!-- SideNavBar (Desktop) -->
+<aside class="hidden md:flex w-64 h-screen border-r border-outline-variant sticky left-0 top-0 flex-col py-4 space-y-1 bg-surface-container-lowest text-on-surface shrink-0">
+<div class="px-6 mb-6">
+<h1 class="text-primary font-black uppercase tracking-widest text-lg">BPM Suite</h1>
+<p class="text-xs text-on-surface-variant mt-1 font-mono">Enterprise Console</p>
+</div>
+<div class="px-4 mb-4">
+<button class="w-full bg-primary text-on-primary font-medium py-2 px-4 rounded flex items-center justify-center gap-2 hover:bg-primary-container transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Create New Workflow
+            </button>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="bg-white text-primary border-l-4 border-primary shadow-sm flex items-center gap-3 px-3 py-2.5 rounded-r font-medium hover:pl-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined fill">dashboard</span>
+                Overview
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded font-medium border-l-4 border-transparent hover:pl-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+                Policy Editor
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded font-medium border-l-4 border-transparent hover:pl-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+                Task Manager
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded font-medium border-l-4 border-transparent hover:pl-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+                Analytics
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded font-medium border-l-4 border-transparent hover:pl-4 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings_applications</span>
+                Administration
+            </a>
+</nav>
+<div class="mt-auto px-3 space-y-1">
+<a class="text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-3 px-3 py-2 rounded text-sm font-medium transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+                Documentation
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-3 px-3 py-2 rounded text-sm font-medium transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+                Support
+            </a>
+</div>
+</aside>
+
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col min-h-screen overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest border-b border-outline-variant shadow-sm flex items-center justify-between px-6 h-16 w-full sticky top-0 z-10 shrink-0">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-on-surface-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="text-xl font-bold text-on-surface tracking-tight md:hidden">BPM Suite</h2>
+<div class="hidden md:flex relative items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[20px]">search</span>
+<input class="pl-10 pr-4 py-1.5 w-64 bg-surface-container-low border border-outline-variant rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface" placeholder="Search tasks, users, workflows..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low p-1.5 rounded transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low p-1.5 rounded transition-colors hidden sm:block">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="h-8 w-8 bg-primary-container text-on-primary-container rounded flex items-center justify-center font-bold text-sm ml-2">
+                    GM
+                </div>
+</div>
+</header>
+
+<!-- Main Workspace -->
+<main class="flex-1 p-6 overflow-auto">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h2 class="text-[24px] font-semibold text-on-surface leading-tight tracking-tight">Department Dashboard</h2>
+<p class="text-sm text-on-surface-variant mt-1">Real-time overview of task volume, bottlenecks, and team workload.</p>
+</div>
+<div class="hidden sm:flex items-center gap-2">
+<span class="text-sm text-on-surface-variant">Last updated: <span class="font-mono text-on-surface">10:42 AM</span></span>
+<button class="text-primary hover:bg-surface-container-low p-1.5 rounded transition-colors">
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+</button>
+</div>
+</div>
+
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- KPI Row -->
+<div class="lg:col-span-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-4 shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Total Tasks</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">assignment</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-on-surface">1,248</span>
+<span class="text-xs text-[#15803D] font-medium flex items-center"><span class="material-symbols-outlined text-[14px]">arrow_upward</span> 12%</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-4 shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Pending Approval</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">pending_actions</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-on-surface">342</span>
+<span class="text-xs text-[#B45309] font-medium flex items-center"><span class="material-symbols-outlined text-[14px]">arrow_upward</span> 5%</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest border-l-4 border-error border-y border-r border-y-outline-variant border-r-outline-variant rounded p-4 shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-error uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">warning</span> Critical SLAs
+                            </span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-error">18</span>
+<span class="text-xs text-error font-medium flex items-center"><span class="material-symbols-outlined text-[14px]">arrow_upward</span> 3</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-4 shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Avg Resolution Time</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">timer</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-on-surface font-mono">4.2h</span>
+<span class="text-xs text-[#15803D] font-medium flex items-center"><span class="material-symbols-outlined text-[14px]">arrow_downward</span> 0.5h</span>
+</div>
+</div>
+</div>
+
+<!-- Main Column: Chart & Team Load -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<!-- Task Volume / Bottlenecks Chart -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded shadow-sm flex flex-col">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center">
+<h3 class="text-sm font-semibold text-on-surface">Weekly Task Volume & Bottlenecks</h3>
+<div class="flex gap-2">
+<button class="text-xs font-medium px-2 py-1 bg-surface-container-low text-on-surface rounded border border-outline-variant">Week</button>
+<button class="text-xs font-medium px-2 py-1 text-on-surface-variant hover:bg-surface-container-low rounded">Month</button>
+</div>
+</div>
+<div class="p-4 h-72 w-full flex items-center justify-center relative bg-surface-container-lowest text-on-surface">
+  <canvas baseChart 
+      [data]="bottleneckChartData" 
+      [options]="barChartOptions"
+      [type]="barChartType"
+      [legend]="barChartLegend"
+      class="w-full h-full">
+  </canvas>
+</div>
+</div>
+
+<!-- Team Workload Table -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded shadow-sm overflow-hidden flex flex-col">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h3 class="text-sm font-semibold text-on-surface">Staff Workload Management</h3>
+<button class="text-primary text-sm font-medium hover:underline flex items-center gap-1">
+                                View All <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm whitespace-nowrap">
+<thead class="bg-surface-container-lowest text-xs font-semibold text-on-surface uppercase tracking-wider border-b border-outline-variant">
+<tr>
+<th class="px-4 py-3">Analyst</th>
+<th class="px-4 py-3">Active Tasks</th>
+<th class="px-4 py-3">Capacity</th>
+<th class="px-4 py-3">Status</th>
+<th class="px-4 py-3 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant text-on-surface">
+<!-- Dynamic Angular Rendering based on officers array -->
+<tr *ngFor="let officer of officers; let idx = index" class="hover:bg-surface-container-low transition-colors" [ngClass]="{'bg-error-container/20': officer.tasks.length > 40}">
+<td class="px-4 py-3 flex items-center gap-3">
+<div class="h-8 w-8 rounded text-white flex items-center justify-center font-bold text-xs" 
+     [ngClass]="officer.tasks.length > 40 ? 'bg-error' : (officer.tasks.length > 30 ? 'bg-[#B45309]' : 'bg-[#15803D]')">
+     {{officer.name | slice:0:2 | uppercase}}
+</div>
+<div>
+<div class="font-medium">{{officer.name}}</div>
+<div class="text-xs text-on-surface-variant">Analyst</div>
+</div>
+</td>
+<td class="px-4 py-3 font-mono" [ngClass]="{'text-error font-bold': officer.tasks.length > 40}">{{officer.tasks.length}}</td>
+<td class="px-4 py-3">
+<div class="w-24 h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full" [ngStyle]="{'width': (officer.tasks.length > 50 ? 100 : officer.tasks.length * 2) + '%'}" 
+     [ngClass]="officer.tasks.length > 40 ? 'bg-error' : (officer.tasks.length > 30 ? 'bg-[#B45309]' : 'bg-[#15803D]')"></div>
+</div>
+<span class="text-xs mt-1 block" [ngClass]="officer.tasks.length > 40 ? 'text-error font-medium' : (officer.tasks.length > 30 ? 'text-[#B45309]' : 'text-on-surface-variant')">
+  {{(officer.tasks.length > 50 ? 100 : officer.tasks.length * 2)}}% Load
+</span>
+</td>
+<td class="px-4 py-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider"
+      [ngClass]="officer.tasks.length > 40 ? 'bg-error-container text-error' : (officer.tasks.length > 30 ? 'bg-[#FEF3C7] text-[#B45309]' : 'bg-[#DCFCE7] text-[#15803D]')">
+      {{officer.tasks.length > 40 ? 'Overloaded' : (officer.tasks.length > 30 ? 'High' : 'Optimal')}}
+</span>
+</td>
+<td class="px-4 py-3 text-right">
+<button class="text-primary border border-outline-variant hover:bg-surface-container px-3 py-1.5 rounded text-xs font-medium transition-colors">Assign</button>
+</td>
+</tr>
+
+<!-- Fallback / Static rows if no officers exist -->
+<tr *ngIf="officers.length === 0" class="hover:bg-surface-container-low transition-colors">
+<td class="px-4 py-3 flex items-center gap-3">
+<div class="h-8 w-8 rounded bg-[#15803D] text-white flex items-center justify-center font-bold text-xs">AS</div>
+<div>
+<div class="font-medium">Ana Silva</div>
+<div class="text-xs text-on-surface-variant">Senior Analyst</div>
+</div>
+</td>
+<td class="px-4 py-3 font-mono">24</td>
+<td class="px-4 py-3">
+<div class="w-24 h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-[#15803D] w-[60%]"></div>
+</div>
+<span class="text-xs text-on-surface-variant mt-1 block">60% Load</span>
+</td>
+<td class="px-4 py-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-[#DCFCE7] text-[#15803D] uppercase tracking-wider">
+                                                Optimal
+                                            </span>
+</td>
+<td class="px-4 py-3 text-right">
+<button class="text-primary border border-outline-variant hover:bg-surface-container px-3 py-1.5 rounded text-xs font-medium transition-colors">Assign</button>
+</td>
+</tr>
+<tr *ngIf="officers.length === 0" class="hover:bg-surface-container-low transition-colors bg-error-container/20">
+<td class="px-4 py-3 flex items-center gap-3">
+<div class="h-8 w-8 rounded bg-error text-white flex items-center justify-center font-bold text-xs">CM</div>
+<div>
+<div class="font-medium">Carlos Mendoza</div>
+<div class="text-xs text-on-surface-variant">Specialist</div>
+</div>
+</td>
+<td class="px-4 py-3 font-mono text-error font-bold">48</td>
+<td class="px-4 py-3">
+<div class="w-24 h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-error w-[95%]"></div>
+</div>
+<span class="text-xs text-error font-medium mt-1 block">95% Load</span>
+</td>
+<td class="px-4 py-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-error-container text-error uppercase tracking-wider">
+                                                Overloaded
+                                            </span>
+</td>
+<td class="px-4 py-3 text-right">
+<button class="bg-primary text-on-primary px-3 py-1.5 rounded text-xs font-medium hover:bg-primary-container transition-colors shadow-sm">Reassign</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- Side Column: Bottlenecks -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container-lowest border border-outline-variant rounded shadow-sm flex flex-col h-full">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-error-container/30">
+<h3 class="text-sm font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-[18px]">gpp_bad</span>
+                                Active Bottlenecks
+                            </h3>
+<span class="bg-error text-on-error text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">3 Critical</span>
+</div>
+<div class="p-4 flex-1 overflow-y-auto space-y-4">
+<!-- Bottleneck Item 1 -->
+<div class="border-l-4 border-error pl-3 py-1">
+<div class="flex justify-between items-start">
+<a class="text-sm font-semibold text-primary hover:underline" href="#">REQ-8924: Vendor Approval</a>
+<span class="text-xs font-mono text-error bg-error-container px-1.5 py-0.5 rounded">Stalled 48h</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1">Awaiting sign-off from Legal Dept. SLA breached.</p>
+<div class="mt-2 flex items-center justify-between">
+<div class="flex items-center gap-1 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">person</span>
+<span>Carlos M.</span>
+</div>
+<button class="text-xs text-primary font-medium hover:underline">Escalate</button>
+</div>
+</div>
+<hr class="border-outline-variant opacity-50"/>
+<!-- Bottleneck Item 2 -->
+<div class="border-l-4 border-[#B45309] pl-3 py-1">
+<div class="flex justify-between items-start">
+<a class="text-sm font-semibold text-primary hover:underline" href="#">PRC-1102: Q3 Audit Prep</a>
+<span class="text-xs font-mono text-[#B45309] bg-[#FEF3C7] px-1.5 py-0.5 rounded">Stalled 24h</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1">Missing dependency: Financials Export v2.</p>
+<div class="mt-2 flex items-center justify-between">
+<div class="flex items-center gap-1 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">person</span>
+<span>Lucia R.</span>
+</div>
+<button class="text-xs text-primary font-medium hover:underline">Ping Owner</button>
+</div>
+</div>
+<hr class="border-outline-variant opacity-50"/>
+<!-- Bottleneck Item 3 -->
+<div class="border-l-4 border-[#B45309] pl-3 py-1">
+<div class="flex justify-between items-start">
+<a class="text-sm font-semibold text-primary hover:underline" href="#">ONB-901: New Hire IT Setup</a>
+<span class="text-xs font-mono text-[#B45309] bg-[#FEF3C7] px-1.5 py-0.5 rounded">Stalled 18h</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1">Hardware inventory depleted. PO pending.</p>
+<div class="mt-2 flex items-center justify-between">
+<div class="flex items-center gap-1 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">group</span>
+<span>IT Ops Team</span>
+</div>
+<button class="text-xs text-primary font-medium hover:underline">View Details</button>
+</div>
+</div>
+</div>
+<div class="p-3 border-t border-outline-variant bg-surface-container-low text-center">
+<button class="text-xs font-medium text-on-surface-variant hover:text-primary transition-colors">View All Process Exceptions</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant flex flex-col md:flex-row justify-between items-center px-8 py-6 gap-4 mt-auto">
+<div class="font-body text-xs text-on-surface-variant">
+                © 2024 Global BPM Systems. Internal Enterprise Use Only.
+            </div>
+<nav class="flex flex-wrap gap-4 text-xs font-body text-on-surface-variant">
+<a class="hover:text-on-surface hover:underline decoration-outline-variant transition-opacity opacity-100 hover:opacity-80" href="#">Privacy Policy</a>
+<a class="hover:text-on-surface hover:underline decoration-outline-variant transition-opacity opacity-100 hover:opacity-80" href="#">Terms of Service</a>
+<a class="hover:text-on-surface hover:underline decoration-outline-variant transition-opacity opacity-100 hover:opacity-80" href="#">WCAG Compliance</a>
+<a class="hover:text-on-surface hover:underline decoration-outline-variant transition-opacity opacity-100 hover:opacity-80" href="#">Security Audit</a>
+</nav>
+</footer>
+</div>
+</div>

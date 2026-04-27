@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #1E6FFF;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #1E6FFF;
+            color: #ffffff;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .footer a {
+            color: #1E6FFF;
+            text-decoration: none;
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+            }
+            .email-container {
+                background-color: #2d2d2d;
+            }
+            .footer {
+                background-color: #3d3d3d;
+                color: #aaa;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>FlowDesk</h1>
+        </div>
+        <div class="content">
+            <th:block th:replace="${content}"></th:block>
+        </div>
+        <div class="footer">
+            <p th:text="${orgName} + ' - Powered by FlowDesk'">Organization - Powered by FlowDesk</p>
+            <p>
+                <a th:href="${baseUrl + '/unsubscribe'}">Cancelar notificaciones</a>
+            </p>
+            <p th:text="'© ' + ${year} + ' FlowDesk. Todos los derechos reservados.'">© 2024 FlowDesk. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

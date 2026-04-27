@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trámite Recibido</title>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <h2>¡Trámite Recibido!</h2>
+        <p>Hola <span th:text="${requesterName}">Solicitante</span>,</p>
+        
+        <p>Confirmamos que hemos recibido tu trámite <strong th:text="${policyName}">Nombre del Trámite</strong>.</p>
+        
+        <p><strong>Tu código de seguimiento es:</strong></p>
+        <p style="font-size: 24px; font-family: monospace; background-color: #f8f9fa; padding: 15px; text-align: center; border-radius: 5px; letter-spacing: 2px;">
+            <span th:text="${trackingCode}">CODE123</span>
+        </p>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <img th:src="${qrCode}" alt="QR Code" style="max-width: 200px; height: auto;" />
+        </div>
+        
+        <p>Puedes seguir el estado de tu trámite en cualquier momento:</p>
+        <p>
+            <a th:href="${trackingUrl}" class="button">Seguir mi trámite</a>
+        </p>
+        
+        <p><strong>Tiempo estimado de resolución:</strong> El tiempo dependerá del tipo de trámite y la complejidad del proceso.</p>
+        
+        <p>Gracias por confiar en nosotros.</p>
+        
+        <p>Saludos,<br>El equipo de <span th:text="${orgName}">FlowDesk</span></p>
+    </th:block>
+</body>
+</html>

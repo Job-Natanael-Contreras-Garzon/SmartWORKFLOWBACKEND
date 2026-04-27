@@ -1,0 +1,220 @@
+<div class="bg-background text-on-background font-body antialiased flex h-screen overflow-hidden">
+<!-- Shared Component: SideNavBar -->
+<nav class="bg-slate-50 dark:bg-slate-950 w-64 h-screen border-r border-slate-200 dark:border-slate-800 sticky left-0 top-0 flex flex-col py-4 space-y-1 shrink-0 z-20">
+<!-- Header -->
+<div class="px-6 mb-8 flex flex-col gap-1">
+<span class="text-blue-800 dark:text-blue-400 font-black uppercase tracking-widest text-lg">Management</span>
+<span class="text-xs font-medium text-slate-500 uppercase tracking-wide">Enterprise Console</span>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 space-y-1">
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:pl-5 transition-all duration-200 cursor-pointer select-none flex items-center px-6 py-3 font-inter text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">dashboard</span> Overview
+            </a>
+<!-- Active State: Policy Editor -->
+<a class="bg-white dark:bg-slate-900 text-blue-800 dark:text-blue-400 border-l-4 border-blue-800 dark:border-blue-400 shadow-sm cursor-pointer select-none flex items-center px-6 py-3 font-inter text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">account_tree</span> Policy Editor
+            </a>
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:pl-5 transition-all duration-200 cursor-pointer select-none flex items-center px-6 py-3 font-inter text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">assignment_turned_in</span> Task Manager
+            </a>
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:pl-5 transition-all duration-200 cursor-pointer select-none flex items-center px-6 py-3 font-inter text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">leaderboard</span> Analytics
+            </a>
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:pl-5 transition-all duration-200 cursor-pointer select-none flex items-center px-6 py-3 font-inter text-[13px] font-medium" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">settings_applications</span> Administration
+            </a>
+</div>
+<div class="px-6 py-4 mt-auto">
+<button class="w-full bg-blue-800 text-white font-inter text-[13px] font-medium py-2 px-4 rounded-lg shadow-sm hover:bg-blue-900 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span> Create New Workflow
+            </button>
+</div>
+</nav>
+
+<!-- Main Content Area -->
+<div class="flex flex-col flex-1 h-full min-w-0">
+<!-- Shared Component: TopAppBar -->
+<header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between px-6 h-16 w-full shrink-0 z-10">
+<div class="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-800 text-[24px]">schema</span>
+                BPM Suite
+                <span class="text-sm font-medium text-slate-400 ml-2 px-2 py-0.5 bg-slate-100 rounded-lg">Draft</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="w-px h-6 bg-slate-200 mx-1"></div>
+<button class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors p-2 rounded-full flex items-center">
+<span class="material-symbols-outlined text-[28px]">account_circle</span>
+</button>
+</div>
+</header>
+
+<!-- Editor Toolbar -->
+<div class="bg-surface border-b border-outline-variant h-14 flex items-center justify-between px-6 shrink-0 z-10">
+<div class="flex items-center gap-2">
+<button (click)="undo()" [disabled]="!canUndo" [ngClass]="{'opacity-50': !canUndo}" class="p-1.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-colors" title="Deshacer">
+<span class="material-symbols-outlined text-[20px]">undo</span>
+</button>
+<button (click)="redo()" [disabled]="!canRedo" [ngClass]="{'opacity-50': !canRedo}" class="p-1.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-colors" title="Rehacer">
+<span class="material-symbols-outlined text-[20px]">redo</span>
+</button>
+<div class="w-px h-6 bg-outline-variant mx-2"></div>
+<button class="p-1.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold">
+<span class="material-symbols-outlined text-[18px]">zoom_out</span>
+</button>
+<span class="text-xs font-mono font-medium text-on-surface-variant w-12 text-center">100%</span>
+<button class="p-1.5 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold">
+<span class="material-symbols-outlined text-[18px]">zoom_in</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-xs font-medium px-3 text-on-surface-variant mr-2" [ngClass]="{'text-[#15803D]': saveStatus === 'Guardado', 'text-[#B45309]': saveStatus === 'Guardando...', 'text-error': saveStatus === 'Error'}">
+  {{saveStatus}}
+</div>
+
+<!-- Validate Button -->
+<button (click)="validateGraph()" class="relative flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container font-semibold rounded-lg text-sm shadow-sm hover:bg-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">rule</span>
+                    Validar
+                    <!-- Error Badge -->
+<span *ngIf="validationErrors.length > 0" class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-error text-[10px] font-bold text-on-error shadow-sm border border-surface">{{validationErrors.length}}</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-semibold rounded-lg text-sm shadow-sm hover:bg-surface-variant transition-colors" [ngClass]="{'opacity-50 cursor-not-allowed': validationErrors.length > 0}">
+<span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+                    Desplegar
+                </button>
+</div>
+</div>
+
+<!-- Editor Workspace -->
+<div class="flex flex-1 overflow-hidden relative">
+<!-- Dynamic Toolbar (Palette) -->
+<aside #dndContainer class="w-16 bg-surface-container-low border-r border-outline-variant flex flex-col items-center py-4 z-10 shrink-0 gap-4">
+   <div title="Start Event" class="w-8 h-8 rounded-full border-[3px] border-[#52c41a] cursor-grab bg-[#f6ffed] shadow-sm hover:scale-110 transition-transform" (mousedown)="startDrag($event, 'start')"></div>
+   <div title="User Task" class="w-10 h-8 rounded border-[2px] border-[#1890ff] cursor-grab bg-[#e6f7ff] shadow-sm hover:scale-110 transition-transform" (mousedown)="startDrag($event, 'task')"></div>
+   <div title="XOR Gateway" class="w-8 h-8 border-[2px] border-[#fa8c16] rotate-45 cursor-grab bg-[#fff7e6] flex items-center justify-center shadow-sm hover:scale-110 transition-transform" (mousedown)="startDrag($event, 'gateway-xor')">
+       <span class="-rotate-45 text-[#fa8c16] text-[10px] font-bold">X</span>
+   </div>
+   <div title="AND Gateway" class="w-8 h-8 border-[2px] border-[#722ed1] rotate-45 cursor-grab bg-[#f9f0ff] flex items-center justify-center shadow-sm hover:scale-110 transition-transform" (mousedown)="startDrag($event, 'gateway-and')">
+       <span class="-rotate-45 text-[#722ed1] text-[14px] font-bold">+</span>
+   </div>
+   <div title="End Event" class="w-8 h-8 rounded-full border-[4px] border-double border-[#f5222d] cursor-grab bg-[#fff1f0] shadow-sm hover:scale-110 transition-transform" (mousedown)="startDrag($event, 'end')"></div>
+</aside>
+
+<!-- Canvas Area (BPMN) -->
+<main #containerWrapper class="flex-1 bg-surface-container-lowest canvas-grid relative overflow-auto">
+    <div #graphContainer class="flex-1 w-full h-full outline-none"></div>
+</main>
+
+<!-- Validation Errors Panel / Properties Panel (Right Sidebar) -->
+<aside *ngIf="validationErrors.length > 0 || selectedNode" class="w-80 bg-surface border-l border-outline-variant flex flex-col shrink-0 shadow-[-8px_0_24px_rgba(0,0,0,0.02)] z-20">
+    
+    <!-- IF Validation Errors exist AND NO node is explicitly selected to view properties -->
+    <ng-container *ngIf="!selectedNode && validationErrors.length > 0">
+        <!-- Panel Header -->
+        <div class="h-14 border-b border-outline-variant bg-surface-container flex items-center justify-between px-5">
+            <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-error text-[20px]" style="font-variation-settings: 'FILL' 1;">error</span>
+            <h2 class="text-sm font-semibold text-on-surface tracking-tight">Errores de Validación</h2>
+            </div>
+            <span class="bg-error/10 text-error px-2 py-0.5 rounded text-[11px] font-bold tracking-wide">{{validationErrors.length}} Encontrados</span>
+        </div>
+        
+        <!-- Errors List -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-surface-bright">
+            <div *ngFor="let err of validationErrors" class="p-3 border border-error bg-error-container/20 rounded-xl flex items-start gap-3 relative overflow-hidden group hover:bg-error-container/30 transition-colors cursor-pointer">
+                <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+                <span class="material-symbols-outlined text-error text-[18px] mt-0.5">error_outline</span>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-[13px] font-semibold text-on-error-container mb-0.5 leading-tight">{{err.message}}</h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-[11px] font-mono text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded">Revisión requerida</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-3 border-t border-outline-variant bg-surface-container-low flex justify-between">
+            <button class="px-3 py-1.5 text-xs font-semibold text-outline hover:text-on-surface transition-colors" (click)="clearValidation()">Limpiar</button>
+            <button class="px-3 py-1.5 text-xs font-semibold bg-surface-variant text-on-surface-variant hover:bg-outline hover:text-surface rounded transition-colors" (click)="forcePublish()">Publicar (Warning)</button>
+        </div>
+    </ng-container>
+
+    <!-- IF Node is Selected (Properties Editor) -->
+    <ng-container *ngIf="selectedNode">
+        <!-- Panel Header -->
+        <div class="h-14 border-b border-outline-variant bg-surface-container flex items-center justify-between px-5">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+                <h2 class="text-sm font-semibold text-on-surface tracking-tight">Propiedades del Nodo</h2>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-5 space-y-4 bg-surface-bright text-on-surface">
+            <p class="text-xs text-on-surface-variant font-mono uppercase tracking-wider mb-2 border-b border-outline-variant pb-2">{{nodeType}}</p>
+            
+            <div *ngIf="nodeType === 'uml-task'" class="flex flex-col gap-4">
+              <div class="flex flex-col">
+                <label class="text-xs font-semibold text-on-surface-variant mb-1">Nombre</label>
+                <input type="text" [(ngModel)]="nodeData.name" (ngModelChange)="updateVisuals()" class="bg-surface border border-outline-variant rounded px-2 py-1.5 focus:ring-1 focus:ring-primary focus:border-primary outline-none text-sm text-on-surface">
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-xs font-semibold text-on-surface-variant mb-1">Descripción</label>
+                <textarea [(ngModel)]="nodeData.description" (ngModelChange)="updateNodeData()" rows="3" class="bg-surface border border-outline-variant rounded px-2 py-1.5 focus:ring-1 focus:ring-primary focus:border-primary outline-none text-sm text-on-surface resize-none"></textarea>
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-xs font-semibold text-on-surface-variant mb-1">Departamento Responsable</label>
+                <select [(ngModel)]="nodeData.department" (ngModelChange)="updateNodeData()" class="bg-surface border border-outline-variant rounded px-2 py-1.5 focus:ring-1 focus:ring-primary focus:border-primary outline-none text-sm text-on-surface">
+                  <option value="">-- Seleccionar --</option>
+                  <option value="HR">Recursos Humanos</option>
+                  <option value="IT">Tecnología (IT)</option>
+                  <option value="Legal">Legal y Compliance</option>
+                  <option value="Finance">Finanzas</option>
+                </select>
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-xs font-semibold text-on-surface-variant mb-1">SLA (Horas)</label>
+                <input type="number" min="0" [(ngModel)]="nodeData.sla" (ngModelChange)="updateNodeData()" class="bg-surface border border-outline-variant rounded px-2 py-1.5 focus:ring-1 focus:ring-primary focus:border-primary outline-none text-sm text-on-surface">
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-xs font-semibold text-on-surface-variant mb-1">Formulario Asociado</label>
+                <select [(ngModel)]="nodeData.formId" (ngModelChange)="updateNodeData()" class="bg-surface border border-outline-variant rounded px-2 py-1.5 focus:ring-1 focus:ring-primary focus:border-primary outline-none text-sm text-on-surface">
+                  <option value="">-- Ninguno --</option>
+                  <option value="form_vacations">Solicitud de Vacaciones</option>
+                  <option value="form_expenses">Reporte de Gastos</option>
+                  <option value="form_incidents">Reporte de Incidencias</option>
+                </select>
+              </div>
+            </div>
+
+            <div *ngIf="nodeType === 'uml-gateway-xor'" class="flex flex-col gap-4">
+              <div class="bg-tertiary-container/20 border border-tertiary-container p-3 rounded shadow-sm text-sm text-on-surface">
+                <p class="font-medium mb-1 flex items-center gap-1 text-tertiary-container"><span class="material-symbols-outlined text-[16px]">info</span>Gateway Condicional (XOR)</p>
+                <p class="text-xs text-on-surface-variant">Verifique que las etiquetas de las aristas salientes describan correctamente las condiciones mutuamente excluyentes y que en total cubran el 100% de los casos.</p>
+              </div>
+              <button class="w-full bg-surface-container border border-outline-variant hover:bg-surface-container-high text-on-surface text-sm font-medium py-2 rounded shadow-sm transition-colors" (click)="checkXorCoverage()">
+                Verificar Cobertura Analítica
+              </button>
+            </div>
+
+            <div *ngIf="nodeType !== 'uml-task' && nodeType !== 'uml-gateway-xor'" class="text-center text-on-surface-variant pt-8 text-sm">
+              <span class="material-symbols-outlined text-4xl mb-2 block text-outline">category</span>
+              <p>Este evento no posee propiedades adicionales configurables de forma manual.</p>
+            </div>
+        </div>
+    </ng-container>
+</aside>
+
+</div>
+</div>
+</div>

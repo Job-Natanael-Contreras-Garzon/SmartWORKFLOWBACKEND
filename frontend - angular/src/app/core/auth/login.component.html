@@ -1,0 +1,127 @@
+<div class="min-h-screen bg-background flex flex-col items-center justify-center relative overflow-hidden font-inter">
+<!-- Background Elements -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary blur-[120px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary-container blur-[120px]"></div>
+</div>
+
+<!-- Header branding (Optional, but gives context) -->
+<div class="absolute top-6 left-8 flex items-center gap-3 z-10">
+    <span class="material-symbols-outlined text-primary text-[28px]">account_tree</span>
+    <span class="text-on-surface font-black tracking-tight text-xl">BPM Suite</span>
+</div>
+
+<!-- Login Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-8 sm:p-10 shadow-2xl w-full max-w-md z-10 relative">
+    
+    <div class="flex flex-col items-center mb-8">
+        <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary border border-outline-variant mb-4">
+            <span class="material-symbols-outlined text-[24px]">lock</span>
+        </div>
+        <h1 class="text-headline-sm font-bold text-on-surface text-center">Iniciar Sesión</h1>
+        <p class="text-body-sm text-on-surface-variant mt-2 text-center">Acceso al Centro de Operaciones BPM</p>
+    </div>
+
+    <!-- Error Toast inside card -->
+    <div *ngIf="errorMessage()" class="bg-error-container text-on-error-container border border-error/20 rounded-lg p-3 mb-6 flex items-start gap-3 text-sm">
+        <span class="material-symbols-outlined text-[18px] mt-0.5">error</span>
+        <p>{{ errorMessage() }}</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        
+        <!-- Org Slug Input (visible cuando no hay subdominio detectado) -->
+        <div *ngIf="!detectedSlug()" class="flex flex-col gap-1.5">
+            <label for="orgSlug" class="text-label-caps text-on-surface-variant uppercase tracking-wider">Organización</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[18px]">domain</span>
+                </div>
+                <input 
+                    type="text" 
+                    id="orgSlug" 
+                    [(ngModel)]="orgSlugInput"
+                    [ngModelOptions]="{standalone: true}"
+                    class="w-full h-11 pl-10 pr-3 bg-surface border border-outline-variant rounded-lg text-body-base text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow placeholder:text-on-surface-variant/50" 
+                    placeholder="slug (ej: cre) — vacío = Super Admin"
+                    autocomplete="organization"
+                />
+            </div>
+            <p class="text-[10px] text-on-surface-variant/60">Dejar vacío para acceso de Super Administrador</p>
+        </div>
+
+        <!-- Email Input -->
+        <div class="flex flex-col gap-1.5">
+            <label for="email" class="text-label-caps text-on-surface-variant uppercase tracking-wider">Correo Institucional</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[18px]">mail</span>
+                </div>
+                <input 
+                    type="email" 
+                    id="email" 
+                    formControlName="email"
+                    class="w-full h-11 pl-10 pr-3 bg-surface border border-outline-variant rounded-lg text-body-base text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow placeholder:text-on-surface-variant/50" 
+                    placeholder="nombre&#64;organizacion.com"
+                    autocomplete="email"
+                />
+            </div>
+            <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="text-error text-[11px] mt-1 font-bold">
+                Ingrese un correo válido.
+            </div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="flex flex-col gap-1.5">
+            <div class="flex justify-between items-center">
+                <label for="password" class="text-label-caps text-on-surface-variant uppercase tracking-wider">Contraseña</label>
+                <a href="#" tabindex="-1" class="text-primary text-[12px] font-medium hover:underline">¿Olvidaste tu contraseña?</a>
+            </div>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[18px]">key</span>
+                </div>
+                <input 
+                    [type]="showPassword() ? 'text' : 'password'" 
+                    id="password" 
+                    formControlName="password"
+                    class="w-full h-11 pl-10 pr-10 bg-surface border border-outline-variant rounded-lg text-body-base text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow placeholder:text-on-surface-variant/50" 
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                />
+                <button 
+                    type="button" 
+                    (click)="togglePasswordVisibility()"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-on-surface-variant hover:text-on-surface transition-colors"
+                    tabindex="-1">
+                    <span class="material-symbols-outlined text-[18px]">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+                </button>
+            </div>
+            <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="text-error text-[11px] mt-1 font-bold">
+                La contraseña es obligatoria.
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+            type="submit" 
+            [disabled]="isLoading()"
+            class="w-full h-11 bg-primary text-on-primary rounded-lg font-semibold text-sm hover:bg-primary-container hover:text-primary-container-on transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+            <span *ngIf="isLoading()" class="material-symbols-outlined animate-spin text-[18px]">sync</span>
+            <span>{{ isLoading() ? 'Autenticando...' : 'Ingresar' }}</span>
+            <span *ngIf="!isLoading()" class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>
+    </form>
+
+    <div class="mt-8 pt-6 border-t border-outline-variant text-center">
+        <p class="text-[12px] text-on-surface-variant">
+            ¿Necesitas acceso a la plataforma?<br>
+            <a href="#" class="text-primary hover:underline font-medium">Contacta al Administrador TI</a>
+        </p>
+    </div>
+</div>
+
+<div class="absolute bottom-6 text-center z-10">
+    <p class="text-[11px] text-on-surface-variant font-code-mono opacity-60">© 2026 Global BPM Systems. Internal Enterprise Use Only.</p>
+</div>
+</div>

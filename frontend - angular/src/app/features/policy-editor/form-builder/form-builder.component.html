@@ -1,0 +1,221 @@
+<div class="bg-background text-on-background font-body antialiased flex h-screen overflow-hidden w-full">
+<!-- SideNavBar -->
+<nav class="w-64 h-screen border-r border-slate-200 dark:border-slate-800 sticky left-0 top-0 bg-slate-50 dark:bg-slate-950 flex flex-col py-4 space-y-1 flat no-shadow font-inter text-[13px] font-medium z-20 hidden md:flex shrink-0">
+  <div class="px-6 mb-8 mt-2">
+    <h1 class="text-blue-800 dark:text-blue-400 font-black uppercase tracking-widest text-lg">Management</h1>
+    <p class="text-slate-500 text-xs mt-1">Enterprise Console</p>
+  </div>
+  <div class="px-4 mb-4">
+    <button class="w-full bg-blue-800 text-white hover:bg-blue-900 rounded py-2 px-4 flex items-center justify-center gap-2 transition-colors">
+      <span class="material-symbols-outlined text-[18px]">add</span>
+      Create New Workflow
+    </button>
+  </div>
+  <div class="flex-1 px-3 space-y-1 overflow-y-auto">
+    <a class="flex items-center gap-3 px-3 py-2.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer select-none hover:pl-5 transition-all duration-200" href="#">
+      <span class="material-symbols-outlined">dashboard</span> Overview
+    </a>
+    <a class="flex items-center gap-3 px-3 py-2.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer select-none hover:pl-5 transition-all duration-200" href="#">
+      <span class="material-symbols-outlined">account_tree</span> Policy Editor
+    </a>
+    <a class="flex items-center gap-3 px-3 py-2.5 rounded-md bg-white dark:bg-slate-900 text-blue-800 dark:text-blue-400 border-l-4 border-blue-800 dark:border-blue-400 shadow-sm cursor-pointer select-none hover:pl-5 transition-all duration-200" href="#">
+      <span class="material-symbols-outlined">assignment_turned_in</span> Task Manager
+    </a>
+    <a class="flex items-center gap-3 px-3 py-2.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer select-none hover:pl-5 transition-all duration-200" href="#">
+      <span class="material-symbols-outlined">settings_applications</span> Form Builder
+    </a>
+  </div>
+</nav>
+
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+  <!-- TopAppBar -->
+  <header class="flex items-center justify-between px-6 h-16 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm z-10 flex-shrink-0 font-inter antialiased text-sm">
+    <div class="flex items-center gap-4">
+      <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight md:hidden">BPM Suite</span>
+      <div class="hidden md:flex items-center bg-surface-container-low rounded px-3 py-1.5 border border-outline-variant">
+        <span class="material-symbols-outlined text-outline text-[18px] mr-2">search</span>
+        <input class="bg-transparent border-none text-on-surface focus:ring-0 text-sm w-64 p-0 placeholder-outline" placeholder="Search forms, fields, schemas..." type="text"/>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-full scale-100 active:scale-[0.98] transition-transform">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+      <button class="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-full scale-100 active:scale-[0.98] transition-transform ml-2">
+        <span class="material-symbols-outlined fill text-primary">account_circle</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Builder Workspace -->
+  <main class="flex-1 flex overflow-hidden bg-surface-container-low">
+    
+    <!-- Left Panel: Components -->
+    <aside class="w-64 bg-surface border-r border-outline-variant flex-shrink-0 flex flex-col h-full overflow-y-auto">
+      <div class="p-4 border-b border-outline-variant bg-surface-container-lowest sticky top-0 z-10">
+        <h2 class="font-headline font-semibold text-sm text-on-surface">Form Components</h2>
+        <p class="text-xs text-on-surface-variant mt-1">Drag and drop to canvas</p>
+      </div>
+      
+      <div class="p-4 space-y-6">
+        <div>
+          <h3 class="font-label text-[11px] font-semibold tracking-wider text-on-surface-variant uppercase mb-3">Fields</h3>
+          <div 
+            cdkDropList
+            #availableList="cdkDropList"
+            [cdkDropListData]="availableFields"
+            [cdkDropListConnectedTo]="[formList]"
+            class="grid grid-cols-2 gap-2"
+          >
+            <div 
+              *ngFor="let field of availableFields"
+              cdkDrag
+              class="bg-surface-container-lowest border border-outline-variant rounded p-2 flex flex-col items-center justify-center gap-1 cursor-move hover:border-primary hover:bg-surface-container-low transition-colors shadow-sm text-on-surface"
+            >
+              <span class="material-symbols-outlined text-outline text-[20px]">{{ getIcon(field.type) }}</span>
+              <span class="text-[11px] font-medium text-center leading-tight">{{ field.label }}</span>
+              
+              <div *cdkDragPreview class="bg-surface-container-lowest border-2 border-primary rounded p-2 flex flex-col items-center justify-center gap-1 shadow-lg w-24 text-on-surface">
+                <span class="material-symbols-outlined text-primary text-[20px]">{{ getIcon(field.type) }}</span>
+                <span class="text-[11px] font-medium text-center leading-tight">{{ field.label }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Canvas -->
+    <section class="flex-1 flex flex-col h-full relative overflow-y-auto p-8">
+      <!-- Canvas Toolbar -->
+      <div class="absolute top-4 right-8 flex bg-surface-container-lowest border border-outline-variant rounded shadow-sm z-10">
+        <button class="px-3 py-1.5 border-r border-outline-variant flex items-center gap-1 text-xs font-medium text-primary bg-primary-fixed-dim bg-opacity-20 hover:bg-surface-container-low transition-colors">
+          <span class="material-symbols-outlined text-[16px]">edit</span> Design
+        </button>
+        <button (click)="save()" class="px-3 py-1.5 flex items-center gap-1 text-xs font-medium text-on-surface hover:bg-surface-container-low transition-colors border-r border-outline-variant">
+          <span class="material-symbols-outlined text-[16px]">save</span> Save
+        </button>
+        <button (click)="onCancel()" class="px-3 py-1.5 flex items-center gap-1 text-xs font-medium text-error hover:bg-surface-container-low transition-colors">
+          <span class="material-symbols-outlined text-[16px]">close</span> Cancel
+        </button>
+      </div>
+
+      <!-- Form Canvas Area -->
+      <div class="max-w-3xl w-full mx-auto bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm min-h-[600px] flex flex-col">
+        <!-- Form Header -->
+        <div class="p-6 border-b border-outline-variant border-dashed">
+          <input class="w-full text-2xl font-headline font-bold text-on-surface border-none focus:ring-0 p-0 bg-transparent mb-2 hover:bg-surface-container-low cursor-text rounded transition-colors" placeholder="Form Title" type="text" value="New Form"/>
+          <textarea class="w-full text-sm text-on-surface-variant border-none focus:ring-0 p-0 bg-transparent resize-none hover:bg-surface-container-low cursor-text rounded transition-colors h-10" placeholder="Form description or instructions..."></textarea>
+        </div>
+
+        <!-- Drop Zone / Canvas -->
+        <div 
+          class="p-6 flex-1 bg-surface-bright space-y-4"
+          cdkDropList
+          #formList="cdkDropList"
+          [cdkDropListData]="formFields"
+          [cdkDropListConnectedTo]="[availableList]"
+          (cdkDropListDropped)="drop($event)"
+        >
+          <!-- Selected Field Example -->
+          <div 
+            *ngFor="let field of formFields; let i = index"
+            cdkDrag
+            (click)="selectField(field)"
+            class="relative group rounded p-4 transition-all cursor-pointer"
+            [ngClass]="selectedField === field ? 'border-2 border-primary bg-primary-fixed bg-opacity-10' : 'border border-transparent hover:border-outline-variant hover:border-dashed'"
+          >
+            <!-- Field Actions -->
+            <div class="absolute -top-3 -right-3 flex bg-surface-container-lowest border border-outline-variant rounded shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-10 text-on-surface">
+              <button class="p-1 hover:text-primary transition-colors border-r border-outline-variant cursor-grab" cdkDragHandle>
+                <span class="material-symbols-outlined text-[16px]">drag_indicator</span>
+              </button>
+              <button (click)="removeField(i, $event)" class="p-1 hover:text-error transition-colors">
+                <span class="material-symbols-outlined text-[16px]">delete</span>
+              </button>
+            </div>
+            
+            <label class="block text-sm font-medium text-on-surface mb-1 flex items-center gap-1">
+              {{ field.label }} <span *ngIf="field.required" class="text-error">*</span>
+            </label>
+            
+            <input *ngIf="field.type === 'string'" class="w-full h-10 px-3 border border-outline-variant rounded bg-surface-container-lowest text-sm opacity-70 cursor-not-allowed pointer-events-none text-on-surface" disabled placeholder="Short Text" type="text"/>
+            <input *ngIf="field.type === 'number'" class="w-full h-10 px-3 border border-outline-variant rounded bg-surface-container-lowest text-sm opacity-70 cursor-not-allowed pointer-events-none text-on-surface" disabled placeholder="0" type="number"/>
+            <input *ngIf="field.type === 'date'" class="w-full h-10 px-3 border border-outline-variant rounded bg-surface-container-lowest text-sm opacity-70 cursor-not-allowed pointer-events-none text-on-surface" disabled type="date"/>
+            <input *ngIf="field.type === 'file'" class="w-full h-10 px-3 border border-outline-variant rounded bg-surface-container-lowest text-sm opacity-70 cursor-not-allowed pointer-events-none text-on-surface" disabled type="file"/>
+            <select *ngIf="field.type === 'select'" class="w-full h-10 px-3 border border-outline-variant rounded bg-surface-container-lowest text-sm opacity-70 cursor-not-allowed appearance-none pointer-events-none text-on-surface" disabled>
+              <option *ngFor="let opt of (field.options?.split(',') || [])">{{opt}}</option>
+            </select>
+          </div>
+
+          <!-- Empty Drop Area Indicator -->
+          <div *ngIf="formFields.length === 0" class="border-2 border-dashed border-outline-variant rounded p-8 flex flex-col items-center justify-center text-on-surface-variant bg-surface-container-low opacity-50">
+            <span class="material-symbols-outlined text-[32px] mb-2">add_circle</span>
+            <p class="text-sm">Drag and drop fields here</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Panel: Properties & Schema -->
+    <aside class="w-80 bg-surface border-l border-outline-variant flex-shrink-0 flex flex-col h-full overflow-hidden">
+      <!-- Properties Header Tabs -->
+      <div class="flex border-b border-outline-variant bg-surface-container-lowest shrink-0">
+        <button class="flex-1 py-3 text-sm font-medium text-primary border-b-2 border-primary bg-surface-bright">Field Settings</button>
+      </div>
+      
+      <!-- Properties Content -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-6">
+        
+        <div *ngIf="!selectedField" class="text-sm text-on-surface-variant flex flex-col items-center justify-center h-full text-center opacity-70">
+          <span class="material-symbols-outlined text-4xl mb-2">touch_app</span>
+          Select a field to edit its properties
+        </div>
+
+        <!-- Basic Props -->
+        <div *ngIf="selectedField">
+          <h4 class="font-label text-[11px] font-semibold tracking-wider text-on-surface-variant uppercase mb-4 border-b border-outline-variant pb-1">Basic Settings</h4>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-on-surface mb-1">Field Label</label>
+              <input [(ngModel)]="selectedField.label" class="w-full h-9 px-2.5 border border-outline-variant rounded bg-surface-container-lowest text-sm focus:border-primary focus:ring-1 focus:ring-primary text-on-surface" type="text"/>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-on-surface mb-1">Property Name (Key)</label>
+              <input [(ngModel)]="selectedField.name" class="w-full h-9 px-2.5 border border-outline-variant rounded bg-surface-container-lowest text-sm font-mono focus:border-primary focus:ring-1 focus:ring-primary text-on-surface" type="text"/>
+              <p class="text-[10px] text-on-surface-variant mt-1">Used in JSON Schema and API payload.</p>
+            </div>
+            
+            <div *ngIf="selectedField.type === 'select'">
+              <label class="block text-xs font-medium text-on-surface mb-1">Options (comma separated)</label>
+              <textarea [(ngModel)]="selectedField.options" class="w-full p-2.5 border border-outline-variant rounded bg-surface-container-lowest text-sm focus:border-primary focus:ring-1 focus:ring-primary h-16 resize-none text-on-surface"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Validation Props -->
+        <div *ngIf="selectedField">
+          <h4 class="font-label text-[11px] font-semibold tracking-wider text-on-surface-variant uppercase mb-4 border-b border-outline-variant pb-1 mt-6">Validation</h4>
+          <div class="space-y-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input [(ngModel)]="selectedField.required" class="rounded border-outline-variant text-primary focus:ring-primary bg-surface-container-lowest" type="checkbox"/>
+              <span class="text-sm text-on-surface">Required Field</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live JSON Schema Preview Snippet (Mini) -->
+      <div class="h-64 border-t border-outline-variant bg-inverse-surface text-inverse-on-surface flex flex-col shrink-0">
+        <div class="px-3 py-1.5 border-b border-outline-variant/30 flex justify-between items-center bg-on-surface">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-outline-variant">Live JSON Schema</span>
+        </div>
+        <div class="p-3 overflow-y-auto text-xs font-mono whitespace-pre text-outline-variant leading-relaxed">
+{{ jsonSchemaPreview }}</div>
+      </div>
+    </aside>
+
+  </main>
+</div>
+</div>

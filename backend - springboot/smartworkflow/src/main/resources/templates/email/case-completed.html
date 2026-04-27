@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trámite Completado</title>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <h2 style="color: #28a745;">¡Trámite Completado Exitosamente!</h2>
+        <p>Hola <span th:text="${requesterName}">Solicitante</span>,</p>
+        
+        <p>Tenemos buenas noticias: tu trámite ha sido completado exitosamente.</p>
+        
+        <p style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; border-left: 4px solid #28a745;">
+            <strong>✓</strong> Todos los pasos del proceso han sido finalizados.
+        </p>
+        
+        <p><strong>Resumen del trámite:</strong></p>
+        <ul>
+            <li>Código de seguimiento: <strong th:text="${trackingCode}">CODE123</strong></li>
+            <li>Estado: <strong>COMPLETADO</strong></li>
+        </ul>
+        
+        <p>Puedes descargar tu comprobante oficial en PDF:</p>
+        <p>
+            <a th:href="${pdfUrl}" class="button" style="background-color: #28a745;">Descargar Comprobante PDF</a>
+        </p>
+        
+        <p><strong>Importante:</strong> Este documento es tu comprobante oficial del trámite completado.</p>
+        
+        <p>Gracias por confiar en nosotros.</p>
+        
+        <p>Saludos,<br>El equipo de <span th:text="${orgName}">FlowDesk</span></p>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,141 @@
+
+# 2026-04-20 13:45:51.844888
++Crea un archivo test.py con una función que sume dos números y tenga docstring.
+
+# 2026-04-20 18:52:15.443449
++exit
+
+# 2026-04-20 18:55:30.516509
++CONTEXTO: WorkflowBPM - Spring Boot 3.x + Java 21
++PRIORIDAD: CRÍTICA - PASO 0 (antes de cualquier desarrollo)
++
++TAREA: Configurar conexión a PostgreSQL remoto (Aiven Cloud) con variables de entorno
++
++REQUERIMIENTOS:
++
++1. Crear archivo .env en la raíz del proyecto (backend - springboot/smartworkflow/)
++   Contenido:Database Configuration - Aiven PostgreSQL
++DB_HOST=pg-df37a89-contrerasjob123-fc4e.l.aivencloud.com
++DB_PORT=18981
++DB_NAME=defaultdb
++DB_USERNAME=avnadmin
++DB_PASSWORD=AVNS_zOJVLKeGTsRv-Awnr1P
++DB_SSL_MODE=require
++JWT Configuration
++JWT_SECRET=dev-secret-key-change-in-prod-min-256-bits-long-for-security
++JWT_EXPIRATION_MS=900000
++JWT_REFRESH_EXPIRATION_MS=604800000
++Application
++SERVER_PORT=8080
++SPRING_PROFILES_ACTIVE=dev
++CORS
++CORS_ALLOWED_ORIGINS=http://localhost:4200,http://localhost:8080
+
+# 2026-04-20 19:02:55.686114
++CONTEXTO: WorkflowBPM - Spring Boot 3.x + Java 21
++PRIORIDAD: CRÍTICA - PASO 0 (antes de cualquier desarrollo)
++
++TAREA: Configurar conexión a PostgreSQL remoto (Aiven Cloud) con variables de entorno
++
++REQUERIMIENTOS:
++
++1. Crear archivo .env en la raíz del proyecto (backend - springboot/smartworkflow/)
++   Contenido:Database Configuration - Aiven PostgreSQL
++DB_HOST=pg-df37a89-contrerasjob123-fc4e.l.aivencloud.com
++DB_PORT=18981
++DB_NAME=defaultdb
++DB_USERNAME=avnadmin
++DB_PASSWORD=AVNS_zOJVLKeGTsRv-Awnr1P
++DB_SSL_MODE=require
++JWT Configuration
++JWT_SECRET=dev-secret-key-change-in-prod-min-256-bits-long-for-security
++JWT_EXPIRATION_MS=900000
++JWT_REFRESH_EXPIRATION_MS=604800000
++Application
++SERVER_PORT=8080
++SPRING_PROFILES_ACTIVE=dev
++CORS
++CORS_ALLOWED_ORIGINS=http://localhost:4200,http://localhost:8080
++Mail (placeholder - configurar después)
++2. Crear archivo .env.example (template público para el repo)
++Contenido similar pero con valores dummy:DB_HOST=localhost
++DB_PORT=5432
++DB_NAME=workflow_bpm_dev
++DB_USERNAME=postgres
++DB_PASSWORD=postgres
++DB_SSL_MODE=disable
++JWT_SECRET=your-secret-key-must-be-at-least-256-bits-long
++JWT_EXPIRATION_MS=900000
++JWT_REFRESH_EXPIRATION_MS=604800000
++SERVER_PORT=8080
++SPRING_PROFILES_ACTIVE=dev
++CORS_ALLOWED_ORIGINS=http://localhost:4200
++3. Actualizar .gitignore para excluir .env
++Agregar al final del archivo .gitignore:Environment variables
++.env
++.env.local
++.env.*.local
++4. Crear/Actualizar application.yml con variables de entorno
++Configuración principal:
++```yaml
++server:
++  port: ${SERVER_PORT:8080}
++
++spring:
++  profiles:
++    active: ${SPRING_PROFILES_ACTIVE:dev}
++  application:
++    name: workflow-bpm
++
++---
++spring:
++  config:
++    activate:
++      on-profile: dev,prod
++
++  datasource:
++    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSL_MODE:require}
++    username: ${DB_USERNAME}
++    password: ${DB_PASSWORD}
++    hikari:
++      connection-timeout: 20000
++      maximum-pool-size: 10
++      minimum-idle: 5
++      idle-timeout: 300000
++      max-lifetime: 600000
++      connection-init-sql: SELECT 1
++    
++  jpa:
++    hibernate:
++      ddl-auto: validate
++    show-sql: ${SHOW_SQL:false}
++    properties:
++      hibernate:
++        format_sql: true
++        dialect: org.hibernate.dialect.PostgreSQLDialect
++        jdbc:
++          lob:
++            non_contextual_creation: true
++    
++  flyway:
++    enabled: true
++    locations: classpath:db/migration
++    baseline-on-migrate: true
++    validate-on-migrate: true
++
++jwt:
++  secret: ${JWT_SECRET}
++  expiration: ${JWT_EXPIRATION_MS:900000}
++  refresh-expiration: ${JWT_REFRESH_EXPIRATION_MS:604800000}
++
++cors:
++  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
++
++logging:
++  level:
++    root: INFO
++    com.smartworkflow: DEBUG
++    org.springframework.web: DEBUG
++    org.springframework.security: DEBUG
++    org.flywaydb: INFO
++    org.hibernate.SQL: DEBUG

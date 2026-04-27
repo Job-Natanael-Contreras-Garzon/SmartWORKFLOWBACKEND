@@ -1,0 +1,48 @@
+<nav class="bg-blue-600 text-white p-4 flex justify-between items-center shadow-md relative">
+  <div class="font-bold text-xl cursor-pointer" routerLink="/">SmartWORKFLOW</div>
+
+  <div class="flex items-center gap-4">
+    <!-- Admin Link -->
+    <a *ngIf="authService.hasRole(['ADMIN'])" routerLink="/admin" class="hover:text-blue-200 transition">Panel Admin</a>
+    
+    <!-- Manager Link -->
+    <a *ngIf="authService.hasRole(['MANAGER', 'ADMIN'])" routerLink="/manager" class="hover:text-blue-200 transition">Dashboard</a>
+
+    <!-- Inbox -->
+    <a *ngIf="authService.getToken()" routerLink="/officer" class="hover:text-blue-200 transition">Bandeja</a>
+
+    <!-- Notifications Bell -->
+    <div class="relative cursor-pointer" (click)="toggleDropdown()" *ngIf="authService.getToken()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hover:text-blue-200 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+      </svg>
+      <span *ngIf="unreadCount > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-bounce">
+        {{unreadCount}}
+      </span>
+
+      <!-- Dropdown -->
+      <div *ngIf="dropdownOpen" class="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg overflow-hidden z-20 text-gray-800">
+        <div class="p-3 font-semibold border-b bg-gray-50 flex justify-between">
+          <span>Notificaciones</span>
+          <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">{{unreadCount}} nuevas</span>
+        </div>
+        <div class="max-h-64 overflow-y-auto">
+          <div *ngIf="notifications.length === 0" class="p-4 text-center text-sm text-gray-500">
+            No tienes notificaciones recientes.
+          </div>
+          <div *ngFor="let n of notifications" 
+               (click)="markAsRead(n)"
+               [ngClass]="{'bg-blue-50 border-l-4 border-blue-500': !n.read}"
+               class="p-3 border-b hover:bg-gray-100 cursor-pointer text-sm">
+            <p class="font-semibold">{{n.title}}</p>
+            <p class="text-xs text-gray-600">{{n.message}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login / Logout -->
+    <a *ngIf="!authService.getToken()" routerLink="/login" class="bg-white text-blue-600 px-4 py-1 rounded hover:bg-gray-100 transition">Iniciar Sesión</a>
+    <button *ngIf="authService.getToken()" (click)="logout()" class="text-red-300 hover:text-red-100 transition">Salir</button>
+  </div>
+</nav>

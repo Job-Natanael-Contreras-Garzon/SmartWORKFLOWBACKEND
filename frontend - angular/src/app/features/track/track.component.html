@@ -1,0 +1,220 @@
+<div class="min-h-screen bg-background text-on-surface font-inter relative flex flex-col">
+<!-- Confetti Canvas -->
+<canvas #confettiCanvas class="pointer-events-none fixed inset-0 z-50"></canvas>
+
+<!-- Top Header -->
+<header class="bg-surface-container-lowest border-b border-outline-variant h-16 flex items-center justify-between px-6 flex-shrink-0">
+<div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-primary text-[24px]">account_tree</span>
+    <span class="text-on-surface font-black tracking-tight text-lg">BPM Suite</span>
+</div>
+<div class="flex items-center gap-4">
+    <button class="p-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface rounded-full transition-colors">
+        <span class="material-symbols-outlined">notifications</span>
+    </button>
+    <button class="p-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface rounded-full transition-colors">
+        <span class="material-symbols-outlined">help_outline</span>
+    </button>
+    <a routerLink="/login" class="p-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface rounded-full transition-colors">
+        <span class="material-symbols-outlined">account_circle</span>
+    </a>
+</div>
+</header>
+
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col items-center p-6 md:p-12">
+<div class="max-w-3xl w-full flex flex-col items-center text-center mt-8 mb-12">
+    <h1 class="text-headline-md md:text-headline-lg font-bold text-on-surface mb-4">Consulta el estado de tu trámite</h1>
+    <p class="text-body-lg text-on-surface-variant max-w-xl">
+        Ingresa el código de seguimiento proporcionado al iniciar tu solicitud para conocer el progreso en tiempo real.
+    </p>
+</div>
+
+<!-- Search Input -->
+<div class="w-full max-w-2xl relative mb-4">
+    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-on-surface-variant">
+        <span class="material-symbols-outlined text-[24px]">search</span>
+    </div>
+    <input 
+        type="text" 
+        [(ngModel)]="trackingCode" 
+        (ngModelChange)="onInputChange()"
+        (keyup.enter)="search()"
+        placeholder="Ej: SW-20240424-AB12CD" 
+        class="w-full h-16 pl-14 pr-32 bg-surface-container-low border border-outline-variant rounded-full text-body-lg text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow font-code-mono tracking-wide placeholder:font-inter placeholder:tracking-normal placeholder:text-on-surface-variant/60 shadow-sm"
+    />
+    <div class="absolute inset-y-0 right-2 flex items-center">
+        <button 
+            (click)="search()"
+            [disabled]="isLoading"
+            class="h-12 px-6 bg-primary-container text-on-primary-container rounded-full font-semibold hover:bg-primary hover:text-on-primary disabled:opacity-50 transition-colors flex items-center gap-2">
+            <span *ngIf="isLoading" class="material-symbols-outlined animate-spin text-[18px]">sync</span>
+            <span>Buscar</span>
+            <span *ngIf="!isLoading" class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>
+    </div>
+</div>
+
+<!-- Error Messages -->
+<div *ngIf="formatError()" class="text-error text-sm font-medium mb-4 flex items-center gap-2">
+    <span class="material-symbols-outlined text-[16px]">error</span>
+    {{ formatError() }}
+</div>
+<div *ngIf="errorMessage()" class="text-error text-sm font-medium mb-4 flex items-center gap-2">
+    <span class="material-symbols-outlined text-[16px]">error</span>
+    {{ errorMessage() }}
+</div>
+<div *ngIf="state() === 'not_found'" class="text-on-surface-variant text-sm font-medium mb-4 flex items-center gap-2 bg-surface-container py-2 px-4 rounded-lg">
+    <span class="material-symbols-outlined text-[18px]">search_off</span>
+    No se encontró ningún trámite con ese código. Verifícalo e intenta de nuevo.
+</div>
+
+<div class="text-body-sm text-on-surface-variant flex items-center gap-2 mb-16">
+    <span class="material-symbols-outlined text-[16px]">info</span>
+    El código de seguimiento fue entregado al registrar tu trámite.
+</div>
+
+<!-- Initial State Info Cards -->
+<div *ngIf="state() === 'idle'" class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
+    <!-- Card 1 -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4">
+            <span class="material-symbols-outlined text-[20px]">mark_email_read</span>
+        </div>
+        <h3 class="text-title-md font-bold text-on-surface mb-2">¿Dónde encuentro mi código?</h3>
+        <p class="text-body-sm text-on-surface-variant">
+            El código de seguimiento fue enviado al correo electrónico que registraste al iniciar el trámite, o impreso en tu comprobante físico.
+        </p>
+    </div>
+    <!-- Card 2 -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4">
+            <span class="material-symbols-outlined text-[20px]">update</span>
+        </div>
+        <h3 class="text-title-md font-bold text-on-surface mb-2">Tiempos de actualización</h3>
+        <p class="text-body-sm text-on-surface-variant">
+            Los estados se actualizan en tiempo real conforme los analistas procesan la documentación. Si no ves cambios recientes, el trámite sigue en evaluación.
+        </p>
+    </div>
+    <!-- Card 3 -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4">
+            <span class="material-symbols-outlined text-[20px]">support_agent</span>
+        </div>
+        <h3 class="text-title-md font-bold text-on-surface mb-2">¿Problemas con el código?</h3>
+        <p class="text-body-sm text-on-surface-variant">
+            Si perdiste tu código o el sistema no lo reconoce, puedes contactar a soporte ciudadano para recuperarlo validando tu identidad.
+        </p>
+    </div>
+</div>
+
+<!-- Tracking Result Section -->
+<div *ngIf="state() === 'found' && result()" class="w-full max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl overflow-hidden">
+        
+        <!-- Result Header -->
+        <div class="bg-surface-container p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="px-3 py-1 bg-primary text-on-primary text-label-caps font-bold rounded-sm uppercase">
+                        {{ statusLabel(result()!.currentStatus) }}
+                    </span>
+                    <span class="text-code-mono text-on-surface-variant bg-surface px-2 py-1 rounded-sm border border-outline-variant text-xs">
+                        {{ result()!.trackingCode }}
+                    </span>
+                </div>
+                <h2 class="text-title-lg font-bold text-on-surface">Licencia de Operación C-3</h2>
+                <p class="text-body-sm text-on-surface-variant mt-1">Solicitante: Empresa Alpha S.A.</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button (click)="openQrModal()" class="flex items-center gap-2 px-4 py-2 bg-surface border border-outline-variant rounded-lg text-on-surface hover:bg-surface-container transition-colors text-sm font-semibold">
+                    <span class="material-symbols-outlined text-[18px]">qr_code_2</span>
+                    Mi QR
+                </button>
+                <button (click)="downloadPdf()" [disabled]="downloading()" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg font-semibold hover:bg-primary-container hover:text-primary-container-on transition-colors disabled:opacity-50 text-sm shadow-sm">
+                    <span *ngIf="downloading()" class="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                    <span *ngIf="!downloading()" class="material-symbols-outlined text-[18px]">download</span>
+                    {{ downloading() ? 'Generando...' : 'Comprobante' }}
+                </button>
+            </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+            <!-- ETA Card -->
+            <div *ngIf="etaLoading()" class="mb-8 p-4 bg-surface-container-low border border-outline-variant rounded-xl flex justify-center items-center h-24 animate-pulse">
+                <div class="flex items-center gap-3 text-on-surface-variant">
+                    <span class="material-symbols-outlined animate-spin">sync</span>
+                    <span class="text-sm font-medium">Calculando tiempos estimados...</span>
+                </div>
+            </div>
+            <app-eta-card *ngIf="!etaLoading() && eta()" [eta]="eta()!" class="block mb-8"></app-eta-card>
+
+            <!-- Stepper integration -->
+            <div class="bg-surface rounded-xl border border-outline-variant p-6 mb-2">
+                <h3 class="text-title-md font-bold text-on-surface mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[20px]">route</span>
+                    Ruta del Trámite
+                </h3>
+                <app-tracking-stepper 
+                    [steps]="result()!.steps" 
+                    [changedIndex]="changedStepIndex()">
+                </app-tracking-stepper>
+            </div>
+        </div>
+        
+        <!-- Live Indicator footer -->
+        <div class="bg-surface-container py-3 px-8 border-t border-outline-variant flex justify-between items-center text-xs">
+            <div class="flex items-center gap-2 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[16px]">update</span>
+                Última actualización: hace un momento
+            </div>
+            <div *ngIf="sseActive()" class="flex items-center gap-2 text-[#15803D] font-bold">
+                <span class="w-2 h-2 rounded-full bg-[#15803D] animate-pulse"></span>
+                CONECTADO EN TIEMPO REAL
+            </div>
+        </div>
+    </div>
+</div>
+
+</main>
+
+<footer class="bg-surface-container-lowest border-t border-outline-variant py-6 mt-auto">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+    <p class="text-body-sm text-on-surface-variant">© 2026 Global BPM Systems. Internal Enterprise Use Only.</p>
+    <div class="flex gap-6 text-body-sm text-on-surface-variant">
+        <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a>
+        <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
+        <a href="#" class="hover:text-primary transition-colors">WCAG Compliance</a>
+        <a href="#" class="hover:text-primary transition-colors">Security Audit</a>
+    </div>
+</div>
+</footer>
+
+<!-- QR Modal -->
+<div *ngIf="qrCodeUrl()" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-2xl p-8 max-w-sm w-full relative animate-in zoom-in duration-200 flex flex-col items-center">
+    <button (click)="closeQrModal()" class="absolute top-4 right-4 p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-full transition-colors">
+        <span class="material-symbols-outlined">close</span>
+    </button>
+    
+    <div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined text-[24px]">qr_code_scanner</span>
+    </div>
+    
+    <h3 class="text-title-lg font-bold text-on-surface text-center mb-1">Tu Código QR</h3>
+    <p class="text-body-sm text-on-surface-variant text-center mb-6">
+        Guarda esta imagen para escanearla desde tu teléfono y acceder al tracking sin escribir el código.
+    </p>
+    
+    <div class="bg-surface p-4 rounded-xl border border-outline-variant mb-6 shadow-sm">
+        <img [src]="qrCodeUrl()" alt="QR Code del Tramite" class="w-48 h-48 mix-blend-multiply" />
+    </div>
+    
+    <button (click)="downloadQr()" class="w-full h-11 bg-primary text-on-primary rounded-lg font-semibold text-sm hover:bg-primary-container hover:text-primary-container-on transition-colors flex items-center justify-center gap-2 shadow-sm">
+        <span class="material-symbols-outlined text-[18px]">download</span>
+        Descargar Imagen
+    </button>
+</div>
+</div>
+</div>

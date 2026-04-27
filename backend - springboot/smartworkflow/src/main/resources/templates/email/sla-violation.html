@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>🚨 ALERTA: SLA Vencido</title>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <h2 style="color: #dc3545;">🚨 ALERTA: SLA VENCIDO</h2>
+        <p>Hola <span th:text="${managerName}">Manager</span>,</p>
+        
+        <p style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; border-left: 4px solid #dc3545;">
+            <strong>ATENCIÓN:</strong> Una actividad ha excedido su tiempo de respuesta (SLA).
+        </p>
+        
+        <p><strong>Detalles de la violación:</strong></p>
+        <ul>
+            <li>Actividad vencida: <strong th:text="${activityName}">Nombre de Actividad</strong></li>
+            <li>Trámite afectado: <strong th:text="${trackingCode}">CODE123</strong></li>
+            <li>Tiempo de retraso: <strong th:text="${horasVencido} + ' horas'">24 horas</strong></li>
+        </ul>
+        
+        <p>Por favor, revisa y toma acción lo antes posible.</p>
+        <p>
+            <a th:href="${caseUrl}" class="button" style="background-color: #dc3545;">Ver trámite ahora</a>
+        </p>
+        
+        <p>Saludos,<br>Sistema de Monitoreo SLA</p>
+    </th:block>
+</body>
+</html>

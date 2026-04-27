@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nueva Tarea Asignada</title>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <h2>Se te asignó una nueva tarea</h2>
+        <p>Hola <span th:text="${officerName}">Oficial</span>,</p>
+        
+        <p>Tienes una nueva tarea asignada en el sistema:</p>
+        
+        <p><strong>Detalles de la tarea:</strong></p>
+        <ul>
+            <li>Actividad: <strong th:text="${activityName}">Nombre de Actividad</strong></li>
+            <li>Trámite: <strong th:text="${trackingCode}">CODE123</strong></li>
+            <li>Solicitante: <span th:text="${requesterName}">Nombre del Solicitante</span></li>
+            <li>SLA disponible: <strong th:text="${slaHours + ' horas'}">24 horas</strong></li>
+        </ul>
+        
+        <p>Por favor, revisa y completa la tarea dentro del tiempo establecido.</p>
+        <p>
+            <a th:href="${taskUrl}" class="button">Ir a mi tarea</a>
+        </p>
+        
+        <p>Saludos,<br>El equipo de <span th:text="${orgName}">FlowDesk</span></p>
+    </th:block>
+</body>
+</html>

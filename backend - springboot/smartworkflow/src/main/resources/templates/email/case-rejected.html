@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trámite Rechazado</title>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <h2 style="color: #dc3545;">Trámite Rechazado</h2>
+        <p>Hola <span th:text="${requesterName}">Solicitante</span>,</p>
+        
+        <p>Lamentamos informarte que tu trámite ha sido rechazado.</p>
+        
+        <div th:if="${motivo}" style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; border-left: 4px solid #dc3545;">
+            <strong>Motivo del rechazo:</strong>
+            <p th:text="${motivo}">Motivo proporcionado</p>
+        </div>
+        
+        <p><strong>¿Qué puedes hacer?</strong></p>
+        <ul>
+            <li>Reiniciar el trámite desde el principio</li>
+            <li>Contactar a la organización para más información</li>
+            <li>Revisar los requisitos del trámite antes de volver a solicitarlo</li>
+        </ul>
+        
+        <p><strong>Información de contacto:</strong></p>
+        <p>Organización: <strong th:text="${orgName}">FlowDesk</strong></p>
+        
+        <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+        
+        <p>Saludos,<br>El equipo de <span th:text="${orgName}">FlowDesk</span></p>
+    </th:block>
+</body>
+</html>

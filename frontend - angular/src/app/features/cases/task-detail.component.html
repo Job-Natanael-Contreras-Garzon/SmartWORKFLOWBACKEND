@@ -1,0 +1,314 @@
+<div class="bg-surface text-on-surface font-body h-screen flex overflow-hidden relative">
+
+<!-- Toast Notification -->
+<div *ngIf="showToast" class="fixed top-4 right-4 px-4 py-3 rounded shadow-lg text-white font-medium text-sm z-50 transition-all duration-300"
+    [ngClass]="toastType === 'success' ? 'bg-[#15803D]' : 'bg-[#B91C1C]'">
+{{ toastMessage }}
+</div>
+
+<!-- SideNavBar -->
+<nav class="bg-surface-container-lowest text-on-surface font-inter text-[13px] font-medium w-64 h-screen border-r border-outline-variant sticky left-0 top-0 flat no-shadow flex flex-col py-4 space-y-1 hidden md:flex shrink-0">
+<div class="px-6 mb-6">
+<h1 class="text-primary font-black uppercase tracking-widest text-lg">Management</h1>
+<p class="text-on-surface-variant text-xs mt-1">Enterprise Console</p>
+</div>
+<div class="px-4 mb-6">
+<button class="w-full bg-primary text-on-primary py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Create New Workflow
+            </button>
+</div>
+<div class="flex-1 space-y-1 px-3">
+<a class="text-on-surface-variant hover:bg-surface-container hover:pl-5 transition-all duration-200 cursor-pointer select-none flex items-center gap-3 px-3 py-2 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                Overview
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container hover:pl-5 transition-all duration-200 cursor-pointer select-none flex items-center gap-3 px-3 py-2 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+                Policy Editor
+            </a>
+<a class="bg-surface-container-lowest text-primary border-l-4 border-primary shadow-sm cursor-pointer select-none flex items-center gap-3 px-3 py-2 rounded-r-lg font-semibold pl-[9px]" href="#">
+<span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+                Task Manager
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container hover:pl-5 transition-all duration-200 cursor-pointer select-none flex items-center gap-3 px-3 py-2 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">leaderboard</span>
+                Analytics
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container hover:pl-5 transition-all duration-200 cursor-pointer select-none flex items-center gap-3 px-3 py-2 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">settings_applications</span>
+                Administration
+            </a>
+</div>
+<div class="mt-auto px-3 space-y-1">
+<div class="h-px bg-outline-variant my-2 mx-3"></div>
+<a class="text-on-surface-variant hover:bg-surface-container hover:pl-5 transition-all duration-200 cursor-pointer select-none flex items-center gap-3 px-3 py-2 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+                Documentation
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container hover:pl-5 transition-all duration-200 cursor-pointer select-none flex items-center gap-3 px-3 py-2 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+                Support
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden bg-background relative">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest text-primary font-inter antialiased text-sm docked full-width top-0 border-b border-outline-variant shadow-sm flex items-center justify-between px-6 h-16 w-full flex-shrink-0 z-10">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold text-on-surface tracking-tight md:hidden">BPM Suite</span>
+<!-- Breadcrumbs -->
+<div class="hidden md:flex items-center text-body-sm text-on-surface-variant">
+<a class="hover:text-primary transition-colors cursor-pointer" (click)="goBack()">Task Manager</a>
+<span class="material-symbols-outlined text-[16px] mx-1">chevron_right</span>
+<a class="hover:text-primary transition-colors cursor-pointer" (click)="goBack()">Queue</a>
+<span class="material-symbols-outlined text-[16px] mx-1">chevron_right</span>
+<span class="font-semibold text-on-surface">REQ-2024-8932</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative scale-100 active:scale-[0.98] transition-transform">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full animate-pulse"></span>
+</button>
+</div>
+<div class="scale-100 active:scale-[0.98] transition-transform">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface rounded-full transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<div class="scale-100 active:scale-[0.98] transition-transform ml-2">
+<button class="flex items-center gap-2 p-1 pl-3 pr-1 bg-surface-container-low border border-outline-variant rounded-full hover:bg-surface-container transition-colors">
+<span class="text-body-sm font-medium text-on-surface">J. Doe</span>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
+                            JD
+                        </div>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Workspace -->
+<main class="flex-1 overflow-y-auto p-container_margin z-0">
+<!-- Header Section -->
+<div class="mb-stack_lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<div class="flex items-center gap-3 mb-1">
+<span class="px-2 py-0.5 bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] rounded-sm text-label-caps font-bold">EN PROCESO</span>
+<span class="text-code-mono text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded-sm border border-outline-variant">SLA: 2h 15m</span>
+</div>
+<h2 class="text-headline-md text-on-surface">Revisión de Solicitud de Licencia Comercial</h2>
+<p class="text-body-sm text-on-surface-variant mt-1">ID: REQ-2024-8932 • Solicitante: Empresa Alpha S.A.</p>
+</div>
+</div>
+<!-- Two Column Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-container_margin h-full pb-20">
+<!-- Left Column: Form (Dynamic JSON Schema representation) -->
+<div class="lg:col-span-2 flex flex-col gap-stack_lg">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 shadow-sm flex-1">
+<h3 class="text-title-sm text-on-surface border-b border-outline-variant pb-3 mb-6">Detalles de Evaluación</h3>
+<!-- Simulamos la estructura dinámica del formulario utilizando los estilos mockups visuales -->
+<form [formGroup]="dynamicForm" class="space-y-stack_md">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack_md">
+<!-- Text Input -->
+<div class="flex flex-col gap-stack_sm">
+<label class="text-label-caps text-on-surface-variant uppercase">Nombre del Inspector</label>
+<input class="h-10 px-3 bg-surface border border-outline-variant rounded-[6px] text-body-base text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow" readonly="" type="text" value="Juan Pérez"/>
+</div>
+<!-- Select -->
+<div class="flex flex-col gap-stack_sm">
+<label class="text-label-caps text-on-surface-variant uppercase">Prioridad de Trámite</label>
+<div class="relative">
+<select class="w-full h-10 pl-3 pr-10 bg-surface border border-outline-variant rounded-[6px] text-body-base text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none transition-shadow">
+<option selected="" value="alta">Alta - Revisión Inmediata</option>
+<option value="media">Media - Estándar</option>
+<option value="baja">Baja - Rutina</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Text Input Group -->
+<div class="flex flex-col gap-stack_sm">
+<label class="text-label-caps text-on-surface-variant uppercase">Dirección del Establecimiento</label>
+<input class="h-10 px-3 bg-surface border border-outline-variant rounded-[6px] text-body-base text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow" type="text" value="Av. Libertador 1234, Piso 5, Of. B"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack_md">
+<div class="flex flex-col gap-stack_sm">
+<label class="text-label-caps text-on-surface-variant uppercase">Metros Cuadrados Declarados</label>
+<input class="h-10 px-3 bg-surface border border-outline-variant rounded-[6px] text-body-base text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow" type="number" value="150"/>
+</div>
+<div class="flex flex-col gap-stack_sm">
+<label class="text-label-caps text-on-surface-variant uppercase">Categoría de Riesgo</label>
+<div class="relative">
+<select class="w-full h-10 pl-3 pr-10 bg-surface border border-outline-variant rounded-[6px] text-body-base text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none transition-shadow">
+<option value="tipo_a">Tipo A (Bajo Riesgo)</option>
+<option selected="" value="tipo_b">Tipo B (Riesgo Medio)</option>
+<option value="tipo_c">Tipo C (Alto Riesgo)</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Document Verification Checklist (Bento style element) -->
+<div class="bg-surface-container-low border border-outline-variant rounded-[6px] p-4 mt-stack_lg">
+<h4 class="text-label-caps text-on-surface-variant mb-4 uppercase">Verificación Documental</h4>
+<div class="space-y-3">
+<label class="flex items-center gap-3 cursor-pointer">
+<input checked="" class="w-4 h-4 text-primary bg-surface border-outline-variant rounded-[4px] focus:ring-primary focus:ring-2" type="checkbox"/>
+<span class="text-body-sm text-on-surface">Planos arquitectónicos aprobados</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer">
+<input checked="" class="w-4 h-4 text-primary bg-surface border-outline-variant rounded-[4px] focus:ring-primary focus:ring-2" type="checkbox"/>
+<span class="text-body-sm text-on-surface">Certificado de seguridad contra incendios</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer">
+<input class="w-4 h-4 text-primary bg-surface border-outline-variant rounded-[4px] focus:ring-primary focus:ring-2" type="checkbox"/>
+<span class="text-body-sm text-on-surface">Estudio de impacto ambiental (Pendiente de revisión)</span>
+</label>
+</div>
+</div>
+<!-- Textarea -->
+<div class="flex flex-col gap-stack_sm mt-stack_lg">
+<label class="text-label-caps text-on-surface-variant uppercase">Comentarios y Observaciones</label>
+<textarea formControlName="comments" class="p-3 bg-surface border border-outline-variant rounded-[6px] text-body-base text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow resize-y" placeholder="Ingrese observaciones técnicas aquí..." rows="4"></textarea>
+<div *ngIf="isInvalid('comments')" class="text-error text-xs mt-1 font-bold">Los comentarios de revisión son obligatorios para cerrar la tarea.</div>
+</div>
+</form>
+</div>
+</div>
+<!-- Right Column: Timeline -->
+<div class="lg:col-span-1">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 shadow-sm h-full flex flex-col">
+<div class="flex items-center justify-between border-b border-outline-variant pb-3 mb-6">
+<h3 class="text-title-sm text-on-surface">Historial del Trámite</h3>
+<button class="text-primary hover:text-primary-container p-1 rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto pr-2 relative">
+<!-- Vertical Line -->
+<div class="absolute left-[15px] top-2 bottom-2 w-0.5 bg-outline-variant z-0"></div>
+<!-- Timeline Items -->
+<div class="space-y-6 relative z-10">
+<!-- Item 1: Completed -->
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-[#DCFCE7] text-[#15803D] border border-[#86EFAC] flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<h4 class="text-body-sm font-semibold text-on-surface">Ingreso de Solicitud</h4>
+<span class="text-label-caps text-on-surface-variant">12 Oct, 09:30</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-1">Solicitud recibida por ventanilla digital. Documentos básicos adjuntos.</p>
+<span class="inline-block mt-2 px-2 py-1 bg-surface-container-low text-on-surface-variant text-[11px] font-medium rounded-sm border border-outline-variant">Por: Sistema Portal</span>
+</div>
+</div>
+<!-- Item 2: Completed -->
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-[#DCFCE7] text-[#15803D] border border-[#86EFAC] flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">fact_check</span>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<h4 class="text-body-sm font-semibold text-on-surface">Validación Inicial</h4>
+<span class="text-label-caps text-on-surface-variant">12 Oct, 14:15</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-1">Documentación básica verificada correctamente. Pasa a evaluación técnica.</p>
+<span class="inline-block mt-2 px-2 py-1 bg-surface-container-low text-on-surface-variant text-[11px] font-medium rounded-sm border border-outline-variant">Por: M. González (Mesa Entrada)</span>
+</div>
+</div>
+<!-- Item 3: Current -->
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container border-2 border-primary-fixed flex items-center justify-center flex-shrink-0 mt-0.5 animate-pulse">
+<span class="material-symbols-outlined text-[16px]">engineering</span>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<h4 class="text-body-sm font-semibold text-primary">Evaluación Técnica</h4>
+<span class="text-label-caps text-primary">Actual</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-1">Revisión de planos y categorización de riesgo en progreso.</p>
+<span class="inline-block mt-2 px-2 py-1 bg-surface-container-low text-on-surface-variant text-[11px] font-medium rounded-sm border border-outline-variant">Asignado a: Usted</span>
+</div>
+</div>
+<!-- Item 4: Pending -->
+<div class="flex gap-4 opacity-50">
+<div class="w-8 h-8 rounded-full bg-surface-container text-outline border border-outline-variant flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">gavel</span>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<h4 class="text-body-sm font-medium text-on-surface">Resolución Final</h4>
+<span class="text-label-caps text-on-surface-variant">Pendiente</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-1">Emisión de dictamen y firma electrónica del director.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Fixed Action Bar at Bottom -->
+<div class="absolute bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] p-4 px-6 z-20 flex justify-between items-center">
+<div class="hidden sm:block">
+<p class="text-body-sm text-on-surface-variant">Último guardado automático: hace 2 min</p>
+</div>
+<div class="flex gap-4 w-full sm:w-auto">
+<button (click)="openModal('reject')" class="flex-1 sm:flex-none px-6 py-2.5 bg-surface text-[#B91C1C] border border-[#FECACA] hover:bg-[#FEF2F2] dark:border-error/30 dark:hover:bg-error/10 rounded-[6px] font-semibold text-sm transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+                    Rechazar
+                </button>
+<button (click)="openModal('complete')" [disabled]="dynamicForm.invalid" class="flex-1 sm:flex-none px-6 py-2.5 bg-[#15803D] text-white hover:bg-[#166534] disabled:bg-[#15803D]/50 disabled:cursor-not-allowed rounded-[6px] font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+                    Completar
+                </button>
+</div>
+</div>
+
+<!-- Confirmation Modal -->
+<div *ngIf="modalOpen" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl w-full max-w-md p-6 m-4 relative animate-in fade-in zoom-in duration-200">
+    <h2 class="text-xl font-bold text-on-surface mb-2">
+    {{ modalAction === 'complete' ? 'Confirmar Tarea Completada' : 'Confirmar Rechazo de Tarea' }}
+    </h2>
+    <p class="text-body-sm text-on-surface-variant mb-4">
+    {{ modalAction === 'complete' ? 'Está a punto de completar la revisión técnica y avanzar el flujo. Puede dejar una nota opcional.' : 'Va a rechazar esta solicitud de licencia. Indique el motivo obligatorio para la bitácora.' }}
+    </p>
+    
+    <textarea 
+    [(ngModel)]="modalNote" 
+    rows="4" 
+    class="w-full bg-surface border border-outline-variant rounded px-3 py-2 text-body-sm text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-none mb-4 transition-colors"
+    [placeholder]="modalAction === 'complete' ? 'Nota opcional...' : 'Motivo de rechazo... (Obligatorio)'"
+    ></textarea>
+    
+    <div *ngIf="modalAction === 'reject' && !modalNote.trim()" class="text-error text-[11px] mt-[-10px] mb-4 font-bold">
+    El motivo es obligatorio para registrar el rechazo.
+    </div>
+    
+    <div class="flex justify-end gap-3 mt-4">
+    <button type="button" (click)="closeModal()" class="px-4 py-2 border border-outline-variant rounded text-on-surface-variant hover:bg-surface-container text-sm font-medium transition-colors">
+        Cancelar
+    </button>
+    <button type="button" (click)="confirmAction()" 
+        [disabled]="(modalAction === 'reject' && !modalNote.trim()) || isSubmitting"
+        class="px-5 py-2 rounded text-white text-sm font-semibold shadow-sm transition-colors flex items-center gap-2"
+        [ngClass]="modalAction === 'complete' ? 'bg-[#15803D] hover:bg-[#166534] disabled:bg-[#15803D]/50' : 'bg-[#B91C1C] hover:bg-[#991B1B] disabled:bg-[#B91C1C]/50'">
+        <span *ngIf="isSubmitting" class="material-symbols-outlined animate-spin text-[16px]">sync</span>
+        {{ isSubmitting ? 'Procesando...' : 'Confirmar Acción' }}
+    </button>
+    </div>
+</div>
+</div>
+
+</div>
+</div>

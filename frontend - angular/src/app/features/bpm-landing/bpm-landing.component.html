@@ -1,0 +1,592 @@
+<!-- Global Background -->
+<div class="blueprint-grid"></div>
+
+<!-- 1. NAVBAR -->
+<nav class="navbar" [class.scrolled]="isScrolled">
+  <div class="container navbar-container">
+    <a href="#" class="logo">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="18" cy="5" r="3"></circle>
+        <circle cx="6" cy="12" r="3"></circle>
+        <circle cx="18" cy="19" r="3"></circle>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+      </svg>
+      FlowDesk
+    </a>
+    
+    <div class="nav-links">
+      <a href="#producto">Producto</a>
+      <a href="#casos-de-uso">Casos de uso</a>
+      <a href="#precios">Precios</a>
+      <a href="#track">Seguimiento</a>
+    </div>
+
+    <div class="nav-actions">
+      <!-- Theme Toggle -->
+      <button class="btn btn-ghost" style="padding: 8px; border-radius: 50%;" (click)="toggleTheme()" aria-label="Toggle Theme">
+        <svg *ngIf="!isDarkMode" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg *ngIf="isDarkMode" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+
+      <!-- Routing integration logic placeholder -->
+      <a href="/login" class="btn btn-ghost">Iniciar sesión</a>
+      <a href="#demo" class="btn btn-filled">Solicitar demo</a>
+    </div>
+
+    <button class="hamburger" (click)="toggleMobileMenu()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- 2. HERO SECTION -->
+<section class="section hero">
+  <!-- SVG Diagram Background Animation -->
+  <svg class="hero-diagram" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice">
+    <path id="path1" d="M100,250 C300,250 300,100 500,100 C700,100 700,400 900,400" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2"/>
+    <path id="path2" d="M100,250 C300,250 300,400 500,400 C700,400 700,250 900,250" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2"/>
+    <circle cx="100" cy="250" r="8" fill="var(--bg-surface)" stroke="var(--border-subtle)" stroke-width="2"/>
+    <circle cx="500" cy="100" r="8" fill="var(--bg-surface)" stroke="var(--border-subtle)" stroke-width="2"/>
+    <circle cx="500" cy="400" r="8" fill="var(--bg-surface)" stroke="var(--border-subtle)" stroke-width="2"/>
+    <circle cx="900" cy="400" r="8" fill="var(--bg-surface)" stroke="var(--border-subtle)" stroke-width="2"/>
+    <circle cx="900" cy="250" r="8" fill="var(--bg-surface)" stroke="var(--border-subtle)" stroke-width="2"/>
+    
+    <!-- Moving dots -->
+    <circle r="4" fill="var(--accent-green)">
+      <animateMotion dur="8s" repeatCount="indefinite">
+        <mpath href="#path1"/>
+      </animateMotion>
+    </circle>
+    <circle r="4" fill="var(--accent-blue)">
+      <animateMotion dur="10s" begin="2s" repeatCount="indefinite">
+        <mpath href="#path2"/>
+      </animateMotion>
+    </circle>
+  </svg>
+
+  <div class="container reveal-up" #revealSection>
+    <div class="tag-pill">
+      ✦ Nuevo — IA para diseño de flujos por voz
+    </div>
+    
+    <h1>
+      Tus procesos,<br/>
+      <span class="text-gradient">bajo control total.</span>
+    </h1>
+    
+    <p>
+      Plataforma inteligente de gestión de flujos de trabajo. Elimina cuellos de botella, automatiza aprobaciones y da visibilidad en tiempo real a tus clientes y departamentos.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="#demo" class="btn btn-filled btn-lg">Solicitar demo gratuita</a>
+      <a href="/track" class="btn btn-ghost btn-lg" style="border-color: var(--accent-green); color: var(--accent-green);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        Trackear Trámite
+      </a>
+      <a href="#como-funciona" class="btn-link">
+        Ver cómo funciona
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Social Proof -->
+    <div class="hero-social-proof">
+      <p>Confiado por empresas líderes</p>
+      <div class="logos-container">
+        <!-- SVG Placeholder Logos -->
+        <svg class="logo-placeholder" viewBox="0 0 100 30"><rect width="100" height="30" rx="4"/><text x="50" y="20" font-size="14" font-family="sans-serif" fill="#080C14" text-anchor="middle">UTILITY CO.</text></svg>
+        <svg class="logo-placeholder" viewBox="0 0 100 30"><rect width="100" height="30" rx="4"/><text x="50" y="20" font-size="14" font-family="sans-serif" fill="#080C14" text-anchor="middle">GOV MUNICIPAL</text></svg>
+        <svg class="logo-placeholder" viewBox="0 0 100 30"><rect width="100" height="30" rx="4"/><text x="50" y="20" font-size="14" font-family="sans-serif" fill="#080C14" text-anchor="middle">BANCO NACIONAL</text></svg>
+        <svg class="logo-placeholder" viewBox="0 0 100 30"><rect width="100" height="30" rx="4"/><text x="50" y="20" font-size="14" font-family="sans-serif" fill="#080C14" text-anchor="middle">CLÍNICA SALUD</text></svg>
+        <svg class="logo-placeholder" viewBox="0 0 100 30"><rect width="100" height="30" rx="4"/><text x="50" y="20" font-size="14" font-family="sans-serif" fill="#080C14" text-anchor="middle">SEGUROS LATAM</text></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="container reveal-up" #revealSection>
+  <div class="stats-container" #revealSection>
+    <div class="stat-item">
+      <div class="stat-value" #statNumber data-value="3.2x">0</div>
+      <div class="stat-label">Más rápido en resolución</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" #statNumber data-value="+94%">0</div>
+      <div class="stat-label">Satisfacción del cliente</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" #statNumber data-value="0">0</div>
+      <div class="stat-label">Colas de espera</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" #statNumber data-value="< 48h">0</div>
+      <div class="stat-label">Implementación promedio</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. PROBLEM VS SOLUTION -->
+<section id="producto" class="section problem-solution">
+  <div class="container reveal-up" #revealSection>
+    <div class="ps-grid">
+      <!-- Problem -->
+      <div class="ps-card problem">
+        <h3>El problema</h3>
+        <ul class="ps-list">
+          <li>
+            <svg class="icon-x" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Trámites perdidos entre departamentos sin visibilidad real.
+          </li>
+          <li>
+            <svg class="icon-x" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Cuellos de botella que nadie detecta a tiempo, incumpliendo SLAs.
+          </li>
+          <li>
+            <svg class="icon-x" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Clientes haciendo cola (física o virtual) solo para saber el estado de su solicitud.
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Solution -->
+      <div class="ps-card solution">
+        <h3>FlowDesk lo resuelve</h3>
+        <ul class="ps-list">
+          <li>
+            <svg class="icon-check" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Trazabilidad completa: sabes exactamente en qué escritorio está cada caso.
+          </li>
+          <li>
+            <svg class="icon-check" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            La IA monitorea y te alerta antes de que un departamento se sature.
+          </li>
+          <li>
+            <svg class="icon-check" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Portal público de seguimiento. El cliente consulta su código y listo.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. FEATURES GRID -->
+<section class="section">
+  <div class="container">
+    <div class="features-header reveal-up" #revealSection>
+      <h2>Poder empresarial. Simplicidad absoluta.</h2>
+      <p style="color: var(--text-secondary); font-size: 18px; max-width: 600px; margin: 0 auto;">Todo lo que tu organización necesita para orquestar operaciones complejas a escala.</p>
+    </div>
+
+    <div class="features-grid">
+      <div *ngFor="let feature of features; let i = index" class="feature-card reveal-up" [ngClass]="'delay-' + ((i%3)*100)" #revealSection>
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path [attr.d]="feature.icon"></path>
+          </svg>
+        </div>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. HOW IT WORKS -->
+<section id="como-funciona" class="section" style="background-color: var(--bg-darker);">
+  <div class="container reveal-up" #revealSection>
+    <div class="features-header">
+      <h2>Automatiza en 4 pasos</h2>
+    </div>
+
+    <div class="stepper-container">
+      <div class="stepper-line">
+        <div class="stepper-line-progress"></div>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">1</div>
+        <h4>Diseña</h4>
+        <p>Dibuja tu política de negocio en el editor visual o descríbela con voz a nuestra IA.</p>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">2</div>
+        <h4>Asigna</h4>
+        <p>Conecta formularios, responsables y SLAs a cada actividad del flujo.</p>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">3</div>
+        <h4>Ejecuta</h4>
+        <p>El motor BPM inteligente mueve los trámites automáticamente de área en área.</p>
+      </div>
+      
+      <div class="step">
+        <div class="step-number">4</div>
+        <h4>Monitorea</h4>
+        <p>Visibilidad total para funcionarios, managers y el cliente final mediante portal público.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. MOCKUP DEMO -->
+<section class="section mockup-section">
+  <div class="container reveal-up" #revealSection>
+    <div class="mockup-header">
+      <h2>Una interfaz para dominarlos a todos</h2>
+      
+      <div class="mockup-toggle">
+        <button [class.active]="isStaffView" (click)="toggleViewMode()">Vista Funcionario</button>
+        <button [class.active]="!isStaffView" (click)="toggleViewMode()">Vista Cliente</button>
+      </div>
+    </div>
+
+    <div class="mockup-container">
+      <!-- Staff View -->
+      <ng-container *ngIf="isStaffView">
+        <div class="mockup-sidebar">
+          <div class="mockup-menu-item" style="margin-bottom: 16px; opacity: 0.5;">
+            <div class="mockup-menu-icon" style="border-radius: 50%;"></div>
+            <span style="font-size: 12px; font-family: var(--font-mono);">DEPARTAMENTO LEGAL</span>
+          </div>
+          <div class="mockup-menu-item active">
+            <div class="mockup-menu-icon"></div> Inbox Trámites
+          </div>
+          <div class="mockup-menu-item">
+            <div class="mockup-menu-icon"></div> Mis Tareas (12)
+          </div>
+          <div class="mockup-menu-item">
+            <div class="mockup-menu-icon"></div> SLAs en Riesgo (2)
+          </div>
+        </div>
+        
+        <div class="mockup-content">
+          <div class="mockup-topbar">
+            <div class="mockup-title">Instalaciones Eléctricas / Revisión Legal</div>
+            <div class="btn btn-filled" style="padding: 6px 12px; font-size: 13px;">+ Nuevo Flujo</div>
+          </div>
+          
+          <div class="mockup-card">
+            <div class="mockup-row">
+              <span style="color: #e3e1eb; font-weight: 500;">Solicitud #TR-8492 - Zona Sur</span>
+              <span class="mockup-badge badge-new">🔴 NUEVO</span>
+            </div>
+            <div class="mockup-row">
+              <span style="color: #c4c5d5;">Expediente #EX-1120 - Ampliación de Red</span>
+              <span class="mockup-badge badge-process">🟡 EN PROCESO (DÍA 3/5)</span>
+            </div>
+            <div class="mockup-row">
+              <span style="color: #c4c5d5;">Permiso Ambiental #PA-993</span>
+              <span class="mockup-badge badge-done">🟢 COMPLETADO</span>
+            </div>
+          </div>
+          
+          <div class="mockup-title" style="font-size: 14px; margin-top: 16px;">Mapa de Flujo en Ejecución: #EX-1120</div>
+          
+          <div class="mockup-node-diagram">
+            <div class="m-node">Ventanilla</div>
+            <div class="m-line"></div>
+            <div class="m-node">Inspección</div>
+            <div class="m-line"></div>
+            <div class="m-node active">Legal</div>
+            <div class="m-line" style="background-color: #282a31;"></div>
+            <div class="m-node" style="opacity: 0.5;">Aprobación</div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Client View -->
+      <ng-container *ngIf="!isStaffView">
+        <div class="mockup-content" style="align-items: center; justify-content: center; background-color: var(--bg-dark);">
+          <div class="mockup-card" style="width: 100%; max-width: 500px; text-align: center; padding: 40px;">
+            <div style="font-family: var(--font-mono); color: var(--accent-green); margin-bottom: 16px;">ESTADO DE SU TRÁMITE</div>
+            <h2 style="font-size: 32px; color: #fff; margin-bottom: 8px;">#EX-1120</h2>
+            <p style="color: #94A3B8; margin-bottom: 40px;">Ampliación de Red - Zona Sur</p>
+            
+            <div style="display: flex; justify-content: space-between; position: relative; margin-bottom: 24px;">
+              <div style="position: absolute; top: 12px; left: 0; right: 0; height: 2px; background-color: #282a31; z-index: 0;"></div>
+              <div style="position: absolute; top: 12px; left: 0; width: 66%; height: 2px; background-color: var(--accent-green); z-index: 0; box-shadow: 0 0 10px var(--accent-green);"></div>
+              
+              <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background-color: var(--accent-green); display: flex; align-items: center; justify-content: center;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <span style="font-size: 11px; margin-top: 8px; color: #c4c5d5;">Recibido</span>
+              </div>
+              
+              <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background-color: var(--bg-surface); border: 2px solid var(--accent-green);"></div>
+                <span style="font-size: 11px; margin-top: 8px; color: var(--accent-green); font-weight: bold;">En Análisis Legal</span>
+              </div>
+              
+              <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background-color: #1a1b22; border: 2px solid #282a31;"></div>
+                <span style="font-size: 11px; margin-top: 8px; color: #64748b;">Resolución</span>
+              </div>
+            </div>
+            
+            <div style="background-color: rgba(30, 111, 255, 0.1); border-left: 3px solid var(--accent-blue); padding: 16px; text-align: left; font-size: 13px; color: #e3e1eb; border-radius: 0 8px 8px 0;">
+              ℹ️ Su trámite se encuentra dentro de los plazos establecidos. No se requiere acción de su parte.
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</section>
+
+<!-- 7. USE CASES -->
+<section id="casos-de-uso" class="section">
+  <div class="container reveal-up" #revealSection>
+    <div class="features-header">
+      <h2>Diseñado para su industria</h2>
+    </div>
+
+    <div class="tabs-container">
+      <button *ngFor="let tab of useCases; let i = index" 
+              class="tab-btn" 
+              [class.active]="activeUseCaseIndex === i"
+              (click)="setUseCase(i)">
+        {{ tab.industry }}
+      </button>
+    </div>
+
+    <div class="tab-content">
+      <div class="use-case-info">
+        <h3>{{ useCases[activeUseCaseIndex].flowName }}</h3>
+        <p style="color: var(--text-secondary); max-width: 500px; font-size: 16px;">
+          Optimiza la colaboración entre {{ useCases[activeUseCaseIndex].departments }} departamentos a lo largo de {{ useCases[activeUseCaseIndex].steps }} etapas de validación y control, garantizando cumplimiento normativo.
+        </p>
+        
+        <div class="use-case-stats">
+          <div class="uc-stat-item">
+            <p>Tiempo de resolución (Antes)</p>
+            <strong style="text-decoration: line-through; color: var(--text-muted);">{{ useCases[activeUseCaseIndex].timeBefore }}</strong>
+          </div>
+          <div class="uc-stat-item">
+            <p>Con FlowDesk (Ahora)</p>
+            <strong class="after">{{ useCases[activeUseCaseIndex].timeAfter }}</strong>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Visual abstract representation of the workflow -->
+      <div style="flex-shrink: 0; position: relative;">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="80" fill="none" stroke="var(--border-highlight)" stroke-width="1" stroke-dasharray="5,5"/>
+          <circle cx="100" cy="100" r="50" fill="none" stroke="var(--accent-blue-dim)" stroke-width="20"/>
+          <circle cx="100" cy="100" r="50" fill="none" stroke="var(--accent-green)" stroke-width="20" stroke-dasharray="314" stroke-dashoffset="100" style="transition: stroke-dashoffset 1s;"/>
+          <text x="100" y="105" font-family="var(--font-display)" font-size="24" fill="#fff" font-weight="bold" text-anchor="middle" alignment-baseline="middle">-75%</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. PRICING -->
+<section id="precios" class="section" style="background-color: var(--bg-darker);">
+  <div class="container reveal-up" #revealSection>
+    <div class="features-header">
+      <h2>Precios transparentes. Escala empresarial.</h2>
+    </div>
+
+    <div class="pricing-toggle">
+      <span [style.color]="!isAnnualPricing ? '#fff' : '#94A3B8'">Mensual</span>
+      <label class="switch">
+        <input type="checkbox" [checked]="isAnnualPricing" (change)="togglePricing()">
+        <span class="slider"></span>
+      </label>
+      <span [style.color]="isAnnualPricing ? '#fff' : '#94A3B8'">Anual</span>
+      <span class="save-badge" *ngIf="isAnnualPricing">Ahorra 20%</span>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- Starter -->
+      <div class="price-card">
+        <div class="price-tier">Starter</div>
+        <div class="price-amount">
+          ${{ isAnnualPricing ? '239' : '299' }}<span>/mes</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 14px;">Para equipos pequeños estandarizando procesos.</p>
+        
+        <ul class="price-features">
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Hasta 3 departamentos</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> 500 trámites activos/mes</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Editor visual drag & drop</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Portal público básico</li>
+        </ul>
+        
+        <button class="btn btn-ghost" style="width: 100%;">Comenzar gratis</button>
+      </div>
+
+      <!-- Professional -->
+      <div class="price-card popular">
+        <div class="popular-badge">Más popular</div>
+        <div class="price-tier">Professional</div>
+        <div class="price-amount" style="color: var(--accent-blue);">
+          ${{ isAnnualPricing ? '639' : '799' }}<span>/mes</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 14px;">Para operaciones de mediana escala que requieren IA.</p>
+        
+        <ul class="price-features">
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Departamentos ilimitados</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> 5.000 trámites activos/mes</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> ✦ Diseño de flujos con IA y Voz</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Detección de cuellos de botella</li>
+        </ul>
+        
+        <button class="btn btn-filled" style="width: 100%;">Prueba gratuita de 14 días</button>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="price-card">
+        <div class="price-tier">Enterprise</div>
+        <div class="price-amount" style="font-size: 32px; padding: 12px 0;">
+          Personalizado
+        </div>
+        <p style="color: var(--text-secondary); font-size: 14px;">Para grandes corporaciones e instituciones públicas.</p>
+        
+        <ul class="price-features">
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Trámites y usuarios ilimitados</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Despliegue On-Premise / Cloud Dedicado</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> SLA garantizado 99.99%</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Implementación y soporte dedicado</li>
+        </ul>
+        
+        <button class="btn btn-ghost" style="width: 100%;">Contactar ventas</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. TESTIMONIALS -->
+<section class="section testimonials">
+  <div class="container reveal-up" #revealSection>
+    <div class="carousel">
+      <div *ngFor="let test of testimonials; let i = index" 
+           class="testimonial-item" 
+           [class.active]="activeTestimonialIndex === i">
+        <p class="t-quote">"{{ test.quote }}"</p>
+        <div class="t-author">
+          <div class="t-avatar">{{ test.initials }}</div>
+          <div class="t-info" style="text-align: left;">
+            <h4>{{ test.name }}</h4>
+            <p>{{ test.role }}, {{ test.company }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="carousel-dots">
+      <button *ngFor="let test of testimonials; let i = index" 
+              class="dot" 
+              [class.active]="activeTestimonialIndex === i"
+              (click)="setTestimonial(i)"></button>
+    </div>
+  </div>
+</section>
+
+<!-- 10. CTA FINAL -->
+<section id="demo" class="section cta-final">
+  <div class="container reveal-up" #revealSection>
+    <div class="cta-content">
+      <h2>¿Listo para eliminar los cuellos de botella de tu organización?</h2>
+      
+      <form class="cta-form" (submit)="$event.preventDefault()">
+        <input type="email" placeholder="tu@empresa.com" class="cta-input" required>
+        <button type="submit" class="btn btn-filled btn-lg">Solicitar demo</button>
+      </form>
+      
+      <p class="cta-note">Sin tarjeta de crédito · Implementación en < 48h · Soporte en español</p>
+    </div>
+  </div>
+</section>
+
+<!-- 11. FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col" style="padding-right: 40px;">
+        <a href="#" class="logo" style="margin-bottom: 16px; display: inline-flex;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+          FlowDesk
+        </a>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">La plataforma BPM Enterprise diseñada para la agilidad organizacional de América Latina.</p>
+        <div class="social-links">
+          <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+          <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
+        </div>
+      </div>
+      
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <ul>
+          <li><a href="#">Editor Visual</a></li>
+          <li><a href="#">Motor BPM</a></li>
+          <li><a href="#">Portal Público (Seguimiento)</a></li>
+          <li><a href="#">Integraciones API</a></li>
+          <li><a href="#">Seguridad Enterprise</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="#">Documentación</a></li>
+          <li><a href="#">Centro de Ayuda</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Webinars</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="#">Sobre nosotros</a></li>
+          <li><a href="#">Contacto Ventas</a></li>
+          <li><a href="#">Partners</a></li>
+          <li><a href="#">Privacidad</a></li>
+          <li><a href="#">Términos</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 FlowDesk Inc. Todos los derechos reservados.</p>
+      <p>Hecho en Latinoamérica 🌎</p>
+    </div>
+  </div>
+</footer>

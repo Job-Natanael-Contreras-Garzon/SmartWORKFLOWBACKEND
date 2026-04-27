@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tu Trámite Avanzó</title>
+</head>
+<body>
+    <th:block th:fragment="content">
+        <h2>¡Tu Trámite Avanzó!</h2>
+        <p>Hola <span th:text="${requesterName}">Solicitante</span>,</p>
+        
+        <p>Tu trámite ha avanzado a la siguiente etapa:</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd; background-color: #28a745; color: white; text-align: center;">
+                    <strong th:text="${fromActivity}">Etapa Anterior</strong>
+                </td>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-size: 20px;">
+                    →
+                </td>
+                <td style="padding: 10px; border: 1px solid #ddd; background-color: #1E6FFF; color: white; text-align: center;">
+                    <strong th:text="${toActivity}">Etapa Actual</strong>
+                </td>
+            </tr>
+        </table>
+        
+        <p><strong>Nuevo departamento responsable:</strong> <span th:text="${toDepartmentName}">Departamento</span></p>
+        
+        <p>Puedes seguir el estado de tu trámite:</p>
+        <p>
+            <a th:href="${trackingUrl}" class="button">Ver estado del trámite</a>
+        </p>
+        
+        <p>Te notificaremos cuando haya más actualizaciones.</p>
+        
+        <p>Saludos,<br>El equipo de <span th:text="${orgName}">FlowDesk</span></p>
+    </th:block>
+</body>
+</html>
