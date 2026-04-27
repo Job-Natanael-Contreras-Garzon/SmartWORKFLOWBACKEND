@@ -1,24 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { ChartConfiguration, ChartData, ChartType, Chart, registerables } from 'chart.js';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, DragDropModule } from '@angular/cdk/drag-drop';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../core/auth/auth.service';
-import { Chart, registerables } from 'chart.js';
+import { AnalyticsService } from '../../core/api/analytics.service';
+import { CaseService, Task } from '../../core/api/case.service';
+import { DepartmentService } from '../../core/api/department.service';
+import { RouterLink } from '@angular/router';
 
 Chart.register(...registerables);
-
-interface Task {
-  id: string;
-  activity: { name: string };
-  assignedTo?: { id: string; name: string };
-  status: string;
-  startedAt: string;
-  priority: string;
-  workflowCase?: { id: string };
-}
 
 interface Officer {
   id: string;
@@ -29,48 +21,70 @@ interface Officer {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective, DragDropModule],
-  templateUrl: './dashboard.component.html'
+  imports: [CommonModule, BaseChartDirective, DragDropModule, RouterLink],
+  templateUrl: './dashboard.component.html',
+  styles: [`
+    :host { display: block; min-height: 100vh; background: #12131a; color: #e3e1eb; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #444653; border-radius: 10px; }
+    .cdk-drop-list-dragging .cdk-drag { transition: transform 250ms cubic-bezier(0, 0, 0.2, 1); }
+    .cdk-drag-placeholder { opacity: 0.3; border: 2px dashed #1e40af !important; background: transparent !important; }
+  `]
 })
 export class DashboardComponent implements OnInit {
-  private http = inject(HttpClient);
+  private analyticsService = inject(AnalyticsService);
+  private caseService = inject(CaseService);
+  private deptService = inject(DepartmentService);
   private toastr = inject(ToastrService);
   private auth = inject(AuthService);
 
   // Charts
   public barChartOptions: ChartConfiguration['options'] = {
     responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: '#8e909f', font: { family: 'Inter', size: 10 } } }
+    },
     scales: {
-      x: {},
-      y: { min: 0 }
+      x: { grid: { display: false }, ticks: { color: '#8e909f' } },
+      y: { grid: { color: '#2a2b36' }, ticks: { color: '#8e909f' } }
     }
   };
-  public barChartType: ChartType = 'bar';
-  public barChartLegend = true;
-
+  
   public bottleneckChartData: ChartData<'bar'> = {
-    labels: [], // e.g. 'Revision', 'Aprobacion'
+    labels: [],
     datasets: [
-      { data: [], label: 'Tiempo Promedio (Horas)', backgroundColor: 'rgba(255,99,132,0.6)' },
-      { data: [], label: 'Tareas Vencidas', backgroundColor: 'rgba(54,162,235,0.6)' }
+      { 
+        data: [], 
+        label: 'Promedio (h)', 
+        backgroundColor: '#1e40af',
+        borderRadius: 4
+      },
+      { 
+        data: [], 
+        label: 'Vencidas', 
+        backgroundColor: '#991b1b',
+        borderRadius: 4
+      }
     ]
   };
 
-  // Drag and Drop (Officers & Unassigned)
-  officers: Officer[] = [];
-  unassignedTasks: Task[] = [];
-  allTaskIds: string[] = ['unassignedList']; // For CDK drop lists connections
+  officers = signal<Officer[]>([]);
+  unassignedTasks = signal<Task[]>([]);
+  allTaskIds: string[] = ['unassignedList'];
 
   ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData() {
     this.loadBottlenecks();
-    this.loadDepartmentTasks();
-    this.loadDepartmentMembers();
+    this.loadDepartmentData();
   }
 
   loadBottlenecks() {
-    const deptId = this.auth.getDepartmentId();
-    this.http.get<any>(`/api/analytics/bottlenecks?departmentId=${deptId}`).subscribe({
-      next: (res) => {
+    this.analyticsService.getBottlenecks().subscribe({
+      next: (res: any) => {
         const activities = res.activityAnalytics || [];
         this.bottleneckChartData.labels = activities.map((a: any) => a.activityName);
         this.bottleneckChartData.datasets[0].data = activities.map((a: any) => a.avgDurationHours);
@@ -79,41 +93,28 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  loadDepartmentMembers() {
-    const deptId = this.auth.getDepartmentId();
-    if (!deptId) return;
-
-    this.http.get<any[]>(`/api/departments/${deptId}/members`).subscribe({
-      next: (members) => {
-        this.officers = members.map(m => ({ id: m.id, name: m.name, tasks: [] }));
-        this.officers.forEach(o => this.allTaskIds.push('officerList-' + o.id));
-        this.distributeTasks();
+  loadDepartmentData() {
+    // En un sistema real, deptId se obtiene del perfil del usuario logueado
+    // Por ahora simulamos o dejamos que los servicios manejen el contexto
+    this.deptService.getDepartmentMembers('placeholder-dept-id').subscribe({
+      next: (members: any[]) => {
+        const mapped = members.map((m: any) => ({ id: m.id, name: m.name, tasks: [] }));
+        this.officers.set(mapped);
+        mapped.forEach((o: any) => this.allTaskIds.push('officerList-' + o.id));
+        this.loadTasks();
       }
     });
   }
 
-  loadDepartmentTasks() {
-    this.http.get<Task[]>('/api/cases/department-tasks?status=PENDING').subscribe({
-      next: (tasks) => {
-        this.unassignedTasks = tasks.filter(t => !t.assignedTo);
-        const assigned = tasks.filter(t => t.assignedTo);
+  loadTasks() {
+    this.caseService.getTasks().subscribe({
+      next: (tasks: Task[]) => {
+        this.unassignedTasks.set(tasks.filter((t: Task) => !t.assignedTo));
+        const assigned = tasks.filter((t: Task) => t.assignedTo);
         
-        // This acts as a cache, we map them into officers when officers load
-        this.distributeTasks(assigned);
-      }
-    });
-  }
-
-  private pendingAssignments: Task[] = [];
-  distributeTasks(tasks?: Task[]) {
-    if (tasks) this.pendingAssignments = tasks;
-    if (this.officers.length === 0) return; // Wait for officers
-
-    this.officers.forEach(o => o.tasks = []);
-    this.pendingAssignments.forEach(t => {
-      const officer = this.officers.find(o => o.id === t.assignedTo?.id);
-      if (officer) {
-        officer.tasks.push(t);
+        const currentOfficers = this.officers();
+        currentOfficers.forEach(o => o.tasks = assigned.filter((t: Task) => t.assignedTo?.id === o.id));
+        this.officers.set([...currentOfficers]);
       }
     });
   }
@@ -136,27 +137,17 @@ export class DashboardComponent implements OnInit {
 
   reassignTask(task: Task, targetOfficerId?: string) {
     if (!targetOfficerId) {
-      this.toastr.warning('No se puede desasignar por drag & drop aún');
-      // Here we might need a desassign API if needed.
+      this.toastr.warning('Seleccione un oficial válido');
       return;
     }
 
-    const payload = {
-      targetUserId: targetOfficerId,
-      reason: 'Reasignado vía Drag&Drop por el Manager'
-    };
-
-    // API expects: PUT /{caseId}/tokens/{tokenId}/reassign
-    // Assuming task model has case ID or backend can infer from tokenId. 
-    // Wait, the backend endpoint requires caseId! 
-    const caseId = (task as any).workflowCase?.id || task.id; // placeholder: adjust according to your DTO
-    
-    this.http.put(`/api/cases/${caseId}/tokens/${task.id}/reassign`, payload).subscribe({
+    this.caseService.reassignTask(task.caseId, task.id, targetOfficerId).subscribe({
       next: () => {
-        this.toastr.success(`Tarea reasignada a nuevo oficial`);
+        this.toastr.success(`Tarea reasignada a ${this.officers().find(o => o.id === targetOfficerId)?.name}`);
       },
       error: () => {
-        this.toastr.error('Error reasignando la tarea');
+        this.toastr.error('Error en la reasignación');
+        this.loadTasks(); // Revert on error
       }
     });
   }

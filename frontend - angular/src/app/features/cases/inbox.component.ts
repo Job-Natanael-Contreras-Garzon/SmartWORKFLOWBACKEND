@@ -1,153 +1,143 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-
-interface OfficerTask {
-  id: string;
-  transactionName: string;
-  applicant: string;
-  startDate: Date;
-  slaHoursTotal: number;
-  elapsedHours: number;
-  status: 'RECIÉN LLEGADO' | 'EN PROCESO' | 'COMPLETADO';
-}
+import { Router, RouterLink } from '@angular/router';
+import { CaseService, Task } from '../../core/api/case.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-inbox',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   template: `
-    <div class="p-6 bg-gray-50 min-h-screen">
-      <div class="max-w-5xl mx-auto">
-        <header class="mb-8 flex justify-between items-end">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-800">Bandeja de Tareas</h1>
-            <p class="text-sm text-gray-500 mt-1">Gestione sus trámites asignados según prioridad y SLA.</p>
+    <div class="bg-[#12131a] text-[#e3e1eb] font-sans h-screen flex overflow-hidden antialiased">
+      <!-- SideNavBar -->
+      <aside class="bg-[#0d0e14] border-r border-[#444653] w-64 h-screen sticky left-0 top-0 flex flex-col py-6 space-y-2 z-20 flex-shrink-0">
+        <div class="px-6 mb-8">
+          <h2 class="text-[#b8c4ff] font-bold uppercase tracking-[0.1em] text-sm">Management</h2>
+          <p class="text-[#8e909f] text-[11px] mt-1 font-medium">Enterprise Console</p>
+        </div>
+        
+        <nav class="flex-1 space-y-1 px-3 overflow-y-auto custom-scrollbar">
+          <a class="text-[#c4c5d5] hover:bg-[#1a1b22] transition-colors flex items-center gap-3 px-3 py-2.5 rounded-[8px] group" routerLink="/manager">
+            <span class="material-symbols-outlined text-[22px] text-[#8e909f] group-hover:text-[#b8c4ff]">dashboard</span>
+            <span class="text-sm font-medium">Overview</span>
+          </a>
+          <a class="text-[#c4c5d5] hover:bg-[#1a1b22] transition-colors flex items-center gap-3 px-3 py-2.5 rounded-[8px] group" routerLink="/admin/policy-editor">
+            <span class="material-symbols-outlined text-[22px] text-[#8e909f] group-hover:text-[#b8c4ff]">account_tree</span>
+            <span class="text-sm font-medium">Policy Editor</span>
+          </a>
+          <a class="bg-[#1e1f26] text-[#b8c4ff] border-l-[3px] border-[#1e40af] flex items-center gap-3 px-3 py-2.5 rounded-r-[8px] shadow-md" routerLink="/officer">
+            <span class="material-symbols-outlined text-[22px]">assignment_turned_in</span>
+            <span class="text-sm font-semibold">Task Manager</span>
+          </a>
+          <a class="text-[#c4c5d5] hover:bg-[#1a1b22] transition-colors flex items-center gap-3 px-3 py-2.5 rounded-[8px] group" routerLink="/manager">
+            <span class="material-symbols-outlined text-[22px] text-[#8e909f] group-hover:text-[#b8c4ff]">leaderboard</span>
+            <span class="text-sm font-medium">Analytics</span>
+          </a>
+          <a class="text-[#c4c5d5] hover:bg-[#1a1b22] transition-colors flex items-center gap-3 px-3 py-2.5 rounded-[8px] group" routerLink="/admin">
+            <span class="material-symbols-outlined text-[22px] text-[#8e909f] group-hover:text-[#b8c4ff]">settings_applications</span>
+            <span class="text-sm font-medium">Administration</span>
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col min-w-0 bg-[#12131a]">
+        <header class="bg-[#1a1b22] border-b border-[#444653] flex items-center justify-between px-8 h-16 w-full z-10 flex-shrink-0">
+          <div class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+            <span class="w-2 h-6 bg-[#1e40af] rounded-full"></span>
+            Inbox de Tareas
           </div>
-          <div class="text-sm bg-white border px-3 py-1.5 rounded-full shadow-sm font-medium text-gray-600">
-            Total pendientes: {{ pendingTasksCount }}
+          <div class="flex items-center gap-4 text-[#8e909f] text-xs font-bold uppercase tracking-widest">
+            Pendientes: {{ tasks().length }}
           </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div *ngFor="let task of sortedTasks" 
-               class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md transition-shadow cursor-pointer relative overflow-hidden"
-               (click)="goToDetail(task.id)">
-            
-            <!-- Side accent color based on urgency -->
-            <div class="absolute left-0 top-0 bottom-0 w-1.5" [ngClass]="getUrgencyColor(task)"></div>
+        <main class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+          <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              @for (task of tasks(); track task.id) {
+                <div class="bg-[#1e1f26] border border-[#444653] rounded-[8px] p-6 hover:border-[#1e40af] transition-all cursor-pointer relative overflow-hidden shadow-lg group"
+                     (click)="goToDetail(task.id)">
+                  
+                  <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#1e40af]"></div>
 
-            <div class="flex justify-between items-start mb-3">
-              <span class="text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wide" [ngClass]="getStatusTagClass(task.status)">
-                <span class="mr-1">{{ getStatusIcon(task.status) }}</span> {{ task.status }}
-              </span>
-              <span class="text-xs text-gray-400 font-medium whitespace-nowrap">{{ task.id }}</span>
-            </div>
+                  <div class="flex justify-between items-start mb-4">
+                    <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-[4px]"
+                          [ngClass]="task.priority === 'HIGH' ? 'bg-[#991b1b]/20 text-[#ffb4ab]' : 'bg-[#1e40af]/20 text-[#b8c4ff]'">
+                      {{ task.priority }}
+                    </span>
+                    <span class="text-[10px] font-mono text-[#8e909f]">#{{ task.id.substring(0,8) }}</span>
+                  </div>
 
-            <h3 class="font-bold text-lg text-gray-800 mb-1 leading-tight">{{ task.transactionName }}</h3>
-            <p class="text-sm text-gray-600 mb-4 whitespace-nowrap overflow-hidden text-ellipsis">
-              <span class="font-medium">Solicitante:</span> {{ task.applicant }}
-            </p>
+                  <h3 class="text-lg font-bold text-white mb-2 leading-tight group-hover:text-[#b8c4ff] transition-colors">
+                    {{ task.activity.name }}
+                  </h3>
+                  <p class="text-xs text-[#8e909f] mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                    {{ task.startedAt | date:'MMM dd, HH:mm' }}
+                  </p>
 
-            <div class="mt-auto">
-              <div class="flex justify-between text-xs text-gray-500 mb-1 font-medium">
-                <span>{{ task.startDate | date:'MMM d, HH:mm' }}</span>
-                <span [ngClass]="{'text-red-600 font-bold': isSLABreached(task)}">
-                  {{ getRemainingHours(task) }}h restantes
-                </span>
-              </div>
-              <!-- ProgressBar SLA -->
-              <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                <div class="h-2 rounded-full transition-all duration-500" 
-                     [style.width.%]="getSLAProgress(task)" 
-                     [ngClass]="getProgressBarColor(task)">
+                  <div class="pt-4 border-t border-[#444653]/50 flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                      <div class="w-6 h-6 rounded-full bg-[#1e40af] flex items-center justify-center text-[10px] font-bold">
+                        {{ task.assignedTo?.name?.charAt(0) }}
+                      </div>
+                      <span class="text-[11px] font-medium text-[#c4c5d5]">{{ task.assignedTo?.name }}</span>
+                    </div>
+                    <button class="text-[#1e40af] hover:text-[#b8c4ff] transition-colors">
+                      <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              }
+              @if (tasks().length === 0 && !isLoading()) {
+                <div class="col-span-full py-20 text-center flex flex-col items-center gap-4 opacity-50">
+                  <span class="material-symbols-outlined text-6xl">inbox</span>
+                  <p class="text-sm font-medium">No hay tareas pendientes en tu bandeja.</p>
+                </div>
+              }
+              @if (isLoading()) {
+                <div class="col-span-full py-20 text-center">
+                  <div class="w-8 h-8 border-4 border-[#1e40af]/30 border-t-[#1e40af] rounded-full animate-spin mx-auto"></div>
+                </div>
+              }
             </div>
           </div>
-        </div>
-
-        <div *ngIf="sortedTasks.length === 0" class="text-center py-12 text-gray-500">
-          <span class="text-4xl block mb-3">☕</span>
-          <p>No tiene tareas pendientes en su bandeja.</p>
-        </div>
-
+        </main>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    :host { display: block; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #444653; border-radius: 10px; }
+  `]
 })
 export class InboxComponent implements OnInit {
-  tasks: OfficerTask[] = [
-    { id: 'TRX-1049', transactionName: 'Revisión de Gastos Q3', applicant: 'Ana Martínez', startDate: new Date(Date.now() - 2 * 3600000), slaHoursTotal: 24, elapsedHours: 2, status: 'RECIÉN LLEGADO' },
-    { id: 'TRX-1055', transactionName: 'Aprobación de Contrato Proveedor', applicant: 'Carlos Sánchez', startDate: new Date(Date.now() - 40 * 3600000), slaHoursTotal: 48, elapsedHours: 40, status: 'EN PROCESO' },
-    { id: 'TRX-1062', transactionName: 'Solicitud de Vacaciones', applicant: 'Luisa López', startDate: new Date(Date.now() - 10 * 3600000), slaHoursTotal: 12, elapsedHours: 10, status: 'EN PROCESO' },
-    { id: 'TRX-1002', transactionName: 'Baja de Activo Fijo', applicant: 'Pedro Gómez', startDate: new Date(Date.now() - 8 * 3600000), slaHoursTotal: 8, elapsedHours: 9, status: 'EN PROCESO' }, // SLA Breached
-  ];
+  private caseService = inject(CaseService);
+  private router = inject(Router);
+  private toastr = inject(ToastrService);
 
-  sortedTasks: OfficerTask[] = [];
-
-  constructor(private router: Router) {}
+  tasks = signal<Task[]>([]);
+  isLoading = signal(false);
 
   ngOnInit() {
-    this.sortTasks();
+    this.loadTasks();
   }
 
-  get pendingTasksCount(): number {
-    return this.tasks.filter(t => t.status !== 'COMPLETADO').length;
-  }
-
-  sortTasks() {
-    // Sort by Urgency (least remaining hours first)
-    this.sortedTasks = [...this.tasks].sort((a, b) => {
-      const aRemaining = a.slaHoursTotal - a.elapsedHours;
-      const bRemaining = b.slaHoursTotal - b.elapsedHours;
-      return aRemaining - bRemaining;
+  loadTasks() {
+    this.isLoading.set(true);
+    this.caseService.getTasks().subscribe({
+      next: (data: Task[]) => {
+        this.tasks.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastr.error('Error al sincronizar bandeja');
+        this.isLoading.set(false);
+      }
     });
-  }
-
-  getRemainingHours(task: OfficerTask): number {
-    return Math.max(0, task.slaHoursTotal - task.elapsedHours);
-  }
-
-  isSLABreached(task: OfficerTask): boolean {
-    return task.elapsedHours >= task.slaHoursTotal;
-  }
-
-  getSLAProgress(task: OfficerTask): number {
-    const progress = (task.elapsedHours / task.slaHoursTotal) * 100;
-    return Math.min(100, Math.max(0, progress));
-  }
-
-  getProgressBarColor(task: OfficerTask): string {
-    const progress = this.getSLAProgress(task);
-    if (progress >= 100) return 'bg-red-600';
-    if (progress > 75) return 'bg-orange-500';
-    return 'bg-blue-500';
-  }
-
-  getUrgencyColor(task: OfficerTask): string {
-    const remaining = this.getRemainingHours(task);
-    if (remaining === 0) return 'bg-red-600';
-    if (remaining <= 4) return 'bg-orange-500';
-    return 'bg-blue-500';
-  }
-
-  getStatusTagClass(status: string): string {
-    switch (status) {
-      case 'RECIÉN LLEGADO': return 'bg-red-50 text-red-700 border border-red-200';
-      case 'EN PROCESO': return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
-      case 'COMPLETADO': return 'bg-green-50 text-green-700 border border-green-200';
-      default: return 'bg-gray-100 text-gray-700 border border-gray-200';
-    }
-  }
-
-  getStatusIcon(status: string): string {
-    switch (status) {
-      case 'RECIÉN LLEGADO': return '🔴';
-      case 'EN PROCESO': return '🟡';
-      case 'COMPLETADO': return '🟢';
-      default: return '⚪';
-    }
   }
 
   goToDetail(taskId: string) {

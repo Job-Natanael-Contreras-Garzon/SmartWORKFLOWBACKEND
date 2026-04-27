@@ -65,7 +65,7 @@ export interface TrackingEta {
 
 @Injectable({ providedIn: 'root' })
 export class TrackingService {
-  private readonly BASE = '/api/public/track';
+  private readonly BASE = '/api/cases/track';
 
   constructor(private http: HttpClient) {}
 
