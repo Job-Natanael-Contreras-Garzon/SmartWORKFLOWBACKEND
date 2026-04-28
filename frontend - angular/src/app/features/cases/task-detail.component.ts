@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
+import { CaseService, Task } from '../../core/api/case.service';
 
 interface FormFieldSchema {
   type: 'text' | 'textarea' | 'select' | 'checkbox' | 'date' | 'file';
@@ -20,6 +21,10 @@ interface FormFieldSchema {
 export class TaskDetailComponent implements OnInit {
   taskId: string = '';
   dynamicForm!: FormGroup;
+
+  task = signal<Task | null>(null);
+  isLoading = signal(false);
+  notFound = false;
 
   modalOpen = false;
   modalAction: 'complete' | 'reject' = 'complete';
@@ -49,12 +54,53 @@ export class TaskDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private caseService: CaseService
   ) {}
 
   ngOnInit() {
-    this.taskId = this.route.snapshot.paramMap.get('id') || 'UNKNOWN';
+    this.taskId = this.route.snapshot.paramMap.get('id') || '';
     this.buildDynamicForm();
+    this.loadTask();
+  }
+
+  loadTask() {
+    if (!this.taskId) {
+      this.notFound = true;
+      return;
+    }
+    this.isLoading.set(true);
+    this.caseService.getTasks().subscribe({
+      next: (data: any) => {
+        const tasks: Task[] = Array.isArray(data) ? data : (data.content || []);
+        const found = tasks.find((t: Task) => t.id === this.taskId);
+        if (found) {
+          this.task.set(found);
+          this.isLoading.set(false);
+        } else {
+          // Fallback: try department tasks
+          this.caseService.getDepartmentTasks().subscribe({
+            next: (deptTasks: Task[]) => {
+              const deptFound = deptTasks.find((t: Task) => t.id === this.taskId);
+              if (deptFound) {
+                this.task.set(deptFound);
+              } else {
+                this.notFound = true;
+              }
+              this.isLoading.set(false);
+            },
+            error: () => {
+              this.notFound = true;
+              this.isLoading.set(false);
+            }
+          });
+        }
+      },
+      error: () => {
+        this.notFound = true;
+        this.isLoading.set(false);
+      }
+    });
   }
 
   buildDynamicForm() {
@@ -77,12 +123,12 @@ export class TaskDetailComponent implements OnInit {
   onFileChange(event: any, fieldName: string) {
     const fileList: FileList = event.target.files;
     if (fileList.length > 0) {
-      // Logic for handling file upload/attaching to form
       this.dynamicForm.patchValue({ [fieldName]: fileList[0].name });
     }
   }
 
   openModal(action: 'complete' | 'reject') {
+    if (action === 'reject') return; // Reject is disabled
     if (action === 'complete' && this.dynamicForm.invalid) {
       this.dynamicForm.markAllAsTouched();
       return;
@@ -98,39 +144,31 @@ export class TaskDetailComponent implements OnInit {
   }
 
   confirmAction() {
-    if (this.modalAction === 'reject' && !this.modalNote.trim()) {
-      return;
-    }
+    const currentTask = this.task();
+    if (!currentTask) return;
 
     this.isSubmitting = true;
 
-    // Payload para el backend
     const payload = {
-      taskId: this.taskId,
-      action: this.modalAction,
-      formData: this.dynamicForm.value,
+      ...this.dynamicForm.value,
       notes: this.modalNote
     };
 
-    console.log('Enviando al backend:', payload);
-
-    // Simulando retraso de API
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.modalOpen = false;
-      
-      const successMsg = this.modalAction === 'complete' 
-        ? 'Tarea completada exitosamente' 
-        : 'Tarea rechazada exitosamente';
-        
-      this.displayToast(successMsg, 'success');
-      
-      // La tarea desaparece de la bandeja / redirige después de mostrar el Toast
-      setTimeout(() => {
-        this.router.navigate(['/officer']);
-      }, 1500);
-      
-    }, 1000);
+    this.caseService.completeTask(currentTask.caseId, currentTask.id, payload).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.modalOpen = false;
+        this.displayToast('Tarea completada exitosamente', 'success');
+        setTimeout(() => {
+          this.router.navigate(['/officer']);
+        }, 1500);
+      },
+      error: () => {
+        this.isSubmitting = false;
+        this.modalOpen = false;
+        this.displayToast('Error al completar la tarea. Intente nuevamente.', 'error');
+      }
+    });
   }
 
   displayToast(message: string, type: 'success' | 'error') {

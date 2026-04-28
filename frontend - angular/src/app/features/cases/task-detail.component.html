@@ -64,7 +64,7 @@
 <span class="material-symbols-outlined text-[16px] mx-1">chevron_right</span>
 <a class="hover:text-primary transition-colors cursor-pointer" (click)="goBack()">Queue</a>
 <span class="material-symbols-outlined text-[16px] mx-1">chevron_right</span>
-<span class="font-semibold text-on-surface">REQ-2024-8932</span>
+<span class="font-semibold text-on-surface">{{ task()?.id?.substring(0, 8) || taskId.substring(0, 8) }}</span>
 </div>
 </div>
 <div class="flex items-center gap-4">
@@ -81,9 +81,9 @@
 </div>
 <div class="scale-100 active:scale-[0.98] transition-transform ml-2">
 <button class="flex items-center gap-2 p-1 pl-3 pr-1 bg-surface-container-low border border-outline-variant rounded-full hover:bg-surface-container transition-colors">
-<span class="text-body-sm font-medium text-on-surface">J. Doe</span>
+<span class="text-body-sm font-medium text-on-surface">{{ task()?.assignedTo?.name || 'Usuario' }}</span>
 <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
-                            JD
+                            {{ (task()?.assignedTo?.name || 'U').charAt(0) }}
                         </div>
 </button>
 </div>
@@ -91,15 +91,34 @@
 </header>
 <!-- Main Workspace -->
 <main class="flex-1 overflow-y-auto p-container_margin z-0">
+
+<!-- Loading State -->
+<div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-32 gap-4">
+  <div class="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+  <p class="text-body-sm text-on-surface-variant font-medium">Cargando tarea...</p>
+</div>
+
+<!-- Not Found State -->
+<div *ngIf="!isLoading() && notFound" class="flex flex-col items-center justify-center py-32 gap-4 opacity-70">
+  <span class="material-symbols-outlined text-[64px] text-on-surface-variant">assignment_late</span>
+  <h3 class="text-title-sm text-on-surface font-semibold">Tarea no encontrada</h3>
+  <p class="text-body-sm text-on-surface-variant">La tarea solicitada no existe o ya fue completada.</p>
+  <button (click)="goBack()" class="mt-2 px-5 py-2 bg-primary text-on-primary rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity">
+    Volver a la bandeja
+  </button>
+</div>
+
+<!-- Task Content -->
+<div *ngIf="!isLoading() && !notFound && task()">
 <!-- Header Section -->
 <div class="mb-stack_lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
 <div>
 <div class="flex items-center gap-3 mb-1">
-<span class="px-2 py-0.5 bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] rounded-sm text-label-caps font-bold">EN PROCESO</span>
-<span class="text-code-mono text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded-sm border border-outline-variant">SLA: 2h 15m</span>
+<span class="px-2 py-0.5 bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] rounded-sm text-label-caps font-bold">{{ task()?.status || 'EN PROCESO' }}</span>
+<span class="text-code-mono text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded-sm border border-outline-variant">{{ task()?.priority || '' }}</span>
 </div>
-<h2 class="text-headline-md text-on-surface">Revisión de Solicitud de Licencia Comercial</h2>
-<p class="text-body-sm text-on-surface-variant mt-1">ID: REQ-2024-8932 • Solicitante: Empresa Alpha S.A.</p>
+<h2 class="text-headline-md text-on-surface">{{ task()?.activity?.name }}</h2>
+<p class="text-body-sm text-on-surface-variant mt-1">Token ID: {{ task()?.id?.substring(0, 8) }} • Case ID: {{ task()?.caseId?.substring(0, 8) }} • Asignado a: {{ task()?.assignedTo?.name || 'N/A' }}</p>
 </div>
 </div>
 <!-- Two Column Layout -->
@@ -231,11 +250,11 @@
 </div>
 <div>
 <div class="flex items-baseline gap-2">
-<h4 class="text-body-sm font-semibold text-primary">Evaluación Técnica</h4>
+<h4 class="text-body-sm font-semibold text-primary">{{ task()?.activity?.name }}</h4>
 <span class="text-label-caps text-primary">Actual</span>
 </div>
 <p class="text-body-sm text-on-surface-variant mt-1">Revisión de planos y categorización de riesgo en progreso.</p>
-<span class="inline-block mt-2 px-2 py-1 bg-surface-container-low text-on-surface-variant text-[11px] font-medium rounded-sm border border-outline-variant">Asignado a: Usted</span>
+<span class="inline-block mt-2 px-2 py-1 bg-surface-container-low text-on-surface-variant text-[11px] font-medium rounded-sm border border-outline-variant">Asignado a: {{ task()?.assignedTo?.name || 'Usted' }}</span>
 </div>
 </div>
 <!-- Item 4: Pending -->
@@ -256,6 +275,8 @@
 </div>
 </div>
 </div>
+</div><!-- end task content -->
+
 </main>
 <!-- Fixed Action Bar at Bottom -->
 <div class="absolute bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] p-4 px-6 z-20 flex justify-between items-center">
@@ -263,11 +284,11 @@
 <p class="text-body-sm text-on-surface-variant">Último guardado automático: hace 2 min</p>
 </div>
 <div class="flex gap-4 w-full sm:w-auto">
-<button (click)="openModal('reject')" class="flex-1 sm:flex-none px-6 py-2.5 bg-surface text-[#B91C1C] border border-[#FECACA] hover:bg-[#FEF2F2] dark:border-error/30 dark:hover:bg-error/10 rounded-[6px] font-semibold text-sm transition-colors flex items-center justify-center gap-2">
+<button disabled class="flex-1 sm:flex-none px-6 py-2.5 bg-surface text-on-surface-variant/40 border border-outline-variant/40 rounded-[6px] font-semibold text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-50">
 <span class="material-symbols-outlined text-[18px]">cancel</span>
                     Rechazar
                 </button>
-<button (click)="openModal('complete')" [disabled]="dynamicForm.invalid" class="flex-1 sm:flex-none px-6 py-2.5 bg-[#15803D] text-white hover:bg-[#166534] disabled:bg-[#15803D]/50 disabled:cursor-not-allowed rounded-[6px] font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-sm">
+<button (click)="openModal('complete')" [disabled]="dynamicForm.invalid || !task() || isLoading()" class="flex-1 sm:flex-none px-6 py-2.5 bg-[#15803D] text-white hover:bg-[#166534] disabled:bg-[#15803D]/50 disabled:cursor-not-allowed rounded-[6px] font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-sm">
 <span class="material-symbols-outlined text-[18px]">check_circle</span>
                     Completar
                 </button>
@@ -278,31 +299,26 @@
 <div *ngIf="modalOpen" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]">
 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl w-full max-w-md p-6 m-4 relative animate-in fade-in zoom-in duration-200">
     <h2 class="text-xl font-bold text-on-surface mb-2">
-    {{ modalAction === 'complete' ? 'Confirmar Tarea Completada' : 'Confirmar Rechazo de Tarea' }}
+    Confirmar Tarea Completada
     </h2>
     <p class="text-body-sm text-on-surface-variant mb-4">
-    {{ modalAction === 'complete' ? 'Está a punto de completar la revisión técnica y avanzar el flujo. Puede dejar una nota opcional.' : 'Va a rechazar esta solicitud de licencia. Indique el motivo obligatorio para la bitácora.' }}
+    Está a punto de completar esta tarea y avanzar el flujo. Puede dejar una nota opcional.
     </p>
     
     <textarea 
     [(ngModel)]="modalNote" 
     rows="4" 
     class="w-full bg-surface border border-outline-variant rounded px-3 py-2 text-body-sm text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-none mb-4 transition-colors"
-    [placeholder]="modalAction === 'complete' ? 'Nota opcional...' : 'Motivo de rechazo... (Obligatorio)'"
+    placeholder="Nota opcional..."
     ></textarea>
-    
-    <div *ngIf="modalAction === 'reject' && !modalNote.trim()" class="text-error text-[11px] mt-[-10px] mb-4 font-bold">
-    El motivo es obligatorio para registrar el rechazo.
-    </div>
     
     <div class="flex justify-end gap-3 mt-4">
     <button type="button" (click)="closeModal()" class="px-4 py-2 border border-outline-variant rounded text-on-surface-variant hover:bg-surface-container text-sm font-medium transition-colors">
         Cancelar
     </button>
     <button type="button" (click)="confirmAction()" 
-        [disabled]="(modalAction === 'reject' && !modalNote.trim()) || isSubmitting"
-        class="px-5 py-2 rounded text-white text-sm font-semibold shadow-sm transition-colors flex items-center gap-2"
-        [ngClass]="modalAction === 'complete' ? 'bg-[#15803D] hover:bg-[#166534] disabled:bg-[#15803D]/50' : 'bg-[#B91C1C] hover:bg-[#991B1B] disabled:bg-[#B91C1C]/50'">
+        [disabled]="isSubmitting"
+        class="px-5 py-2 rounded text-white text-sm font-semibold shadow-sm transition-colors flex items-center gap-2 bg-[#15803D] hover:bg-[#166534] disabled:bg-[#15803D]/50">
         <span *ngIf="isSubmitting" class="material-symbols-outlined animate-spin text-[16px]">sync</span>
         {{ isSubmitting ? 'Procesando...' : 'Confirmar Acción' }}
     </button>
