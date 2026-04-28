@@ -379,7 +379,7 @@
         <!-- Password -->
         <div>
           <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest block mb-1">
-            Password {{ modalMode === 'create' ? '' : '(leave blank to keep current)' }}
+            {{ modalMode === 'create' ? 'Password' : 'Password (leave blank to keep current)' }}
             @if (modalMode === 'create') { <span class="text-[#ffb4ab]">*</span> }
           </label>
           <input [(ngModel)]="userForm.password" type="password" placeholder="••••••••"
