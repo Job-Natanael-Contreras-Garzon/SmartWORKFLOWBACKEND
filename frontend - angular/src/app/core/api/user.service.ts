@@ -10,6 +10,7 @@ export interface User {
   status: string;
   createdAt: string;
   departmentId?: string;
+  password?: string;
 }
 
 @Injectable({
