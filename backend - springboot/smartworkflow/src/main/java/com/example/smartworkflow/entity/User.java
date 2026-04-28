@@ -25,10 +25,12 @@ public class User {
      * NULL para el SUPER_ADMIN (usuario de sistema sin organización).
      * NOT NULL para ADMIN, MANAGER y OFFICER.
      */
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "org_id", nullable = true)
     private Organization organization;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;

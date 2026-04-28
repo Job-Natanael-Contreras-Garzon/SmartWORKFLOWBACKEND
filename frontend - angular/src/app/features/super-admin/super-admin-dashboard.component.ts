@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { OrganizationService, Organization } from '../../core/api/organization.service';
 import { AuditLogService, AuditLogEntry } from '../../core/api/audit-log.service';
+import { UserService, User } from '../../core/api/user.service';
 
 @Component({
   selector: 'app-super-admin-dashboard',
@@ -23,10 +24,9 @@ import { AuditLogService, AuditLogEntry } from '../../core/api/audit-log.service
             </svg>
             <span>SmartWORKFLOW</span>
           </div>
-          <span class="sa-badge">Super Admin</span>
         </div>
         <div class="sa-header__right">
-          <span class="sa-user-name">{{ authService.getUserName() }}</span>
+          <span class="sa-badge">{{ authService.getUserName() }}</span>
           <button class="sa-btn sa-btn--ghost" (click)="logout()">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -76,46 +76,10 @@ import { AuditLogService, AuditLogEntry } from '../../core/api/audit-log.service
             </button>
           </div>
 
-          <!-- Create Org Form -->
-          @if (showCreateOrg()) {
-            <div class="sa-form-card">
-              <h3>Crear Organización</h3>
-              <div class="sa-form-grid">
-                <div class="sa-field">
-                  <label>Nombre</label>
-                  <input type="text" [(ngModel)]="newOrg.name" placeholder="Nombre de la organización">
-                </div>
-                <div class="sa-field">
-                  <label>Slug (subdominio)</label>
-                  <input type="text" [(ngModel)]="newOrg.slug" placeholder="mi-empresa">
-                </div>
-                <div class="sa-field">
-                  <label>Email del Admin</label>
-                  <input type="email" [(ngModel)]="newOrg.adminEmail" placeholder="admin@empresa.com">
-                </div>
-                <div class="sa-field">
-                  <label>Nombre del Admin</label>
-                  <input type="text" [(ngModel)]="newOrg.adminName" placeholder="Administrador">
-                </div>
-                <div class="sa-field">
-                  <label>Contraseña del Admin</label>
-                  <input type="password" [(ngModel)]="newOrg.adminPassword" placeholder="••••••••">
-                </div>
-              </div>
-              <div class="sa-form-actions">
-                <button class="sa-btn sa-btn--ghost" (click)="showCreateOrg.set(false)">Cancelar</button>
-                <button class="sa-btn sa-btn--primary" (click)="createOrg()" [disabled]="isCreating()">
-                  {{ isCreating() ? 'Creando...' : 'Crear Organización' }}
-                </button>
-              </div>
-              @if (createError()) {
-                <p class="sa-error">{{ createError() }}</p>
-              }
-            </div>
-          }
+          <!-- Modal form logic moved to the bottom overlay -->
 
           <!-- Org List -->
-          <div class="sa-table-wrap">
+          <div class="sa-table-wrap sa-desktop-only">
             <table class="sa-table">
               <thead>
                 <tr>
@@ -151,6 +115,41 @@ import { AuditLogService, AuditLogEntry } from '../../core/api/audit-log.service
               </tbody>
             </table>
           </div>
+
+          <!-- Mobile Org Cards -->
+          <div class="sa-mobile-only sa-user-cards">
+            @for (org of orgs(); track org.id) {
+              <div class="sa-user-card sa-user-card--org">
+                <div class="sa-user-card__header">
+                  <div class="sa-user-info">
+                    <span class="sa-user-avatar">{{ org.name.charAt(0) }}</span>
+                    <div class="sa-user-details">
+                      <span class="sa-user-name">{{ org.name }}</span>
+                      <span class="sa-user-email text-xs">{{ org.createdAt | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                  </div>
+                  <button class="sa-btn sa-btn--primary sa-btn--sm sa-btn--glow" (click)="viewOrgUsers(org)">
+                    Usuarios
+                  </button>
+                </div>
+                <div class="sa-user-card__body sa-user-card__body--compact">
+                  <div class="sa-card-field">
+                    <label>ID / SLUG</label>
+                    <code class="sa-slug">{{ org.slug }}</code>
+                  </div>
+                </div>
+              </div>
+            }
+            @if (orgs().length === 0) {
+              <div class="sa-empty-state">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="9" y1="3" x2="9" y2="21"></line>
+                </svg>
+                <p>No hay organizaciones registradas</p>
+              </div>
+            }
+          </div>
         </section>
 
         <!-- Audit Log Panel -->
@@ -175,6 +174,248 @@ import { AuditLogService, AuditLogEntry } from '../../core/api/audit-log.service
         </section>
       </div>
     </div>
+
+    <!-- Users Modal Overlay -->
+    @if (showUsersModal()) {
+      <div class="sa-modal-overlay" (click)="closeUsersModal()">
+        <div class="sa-modal" (click)="$event.stopPropagation()">
+          <div class="sa-modal__header">
+            <div class="sa-modal__title">
+              <span class="sa-org-avatar sa-org-avatar--lg">{{ selectedOrg()?.name?.charAt(0) }}</span>
+              <div class="sa-modal__header-text">
+                <h2>Usuarios de {{ selectedOrg()?.name }}</h2>
+                <p class="sa-muted">Gestionar equipo y accesos</p>
+              </div>
+            </div>
+            <button class="sa-btn sa-btn--ghost sa-btn--icon" (click)="closeUsersModal()">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <div class="sa-modal__filters">
+            <div class="sa-field sa-field--inline">
+              <label>Rol</label>
+              <select [ngModel]="selectedRole()" (ngModelChange)="selectedRole.set($event)">
+                <option value="">Todos los Roles</option>
+                <option value="ADMIN">Administrador</option>
+                <option value="MANAGER">Gerente</option>
+                <option value="OFFICER">Oficial</option>
+              </select>
+            </div>
+            <div class="sa-field sa-field--inline">
+              <label>Estado</label>
+              <select [ngModel]="selectedStatus()" (ngModelChange)="selectedStatus.set($event)">
+                <option value="">Todos los Estados</option>
+                <option value="ACTIVE">Activo</option>
+                <option value="INACTIVE">Inactivo</option>
+                <option value="SUSPENDED">Suspendido</option>
+              </select>
+            </div>
+            <div class="sa-btn-actualizar">
+              <button class="sa-btn sa-btn--primary" (click)="loadOrgUsers()" [disabled]="isLoadingUsers()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" [class.sa-spin]="isLoadingUsers()">
+                  <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                Actualizar
+              </button>
+            </div>
+          </div>
+
+          <div class="sa-modal__content">
+            @if (isLoadingUsers()) {
+              <div class="sa-loader-wrap">
+                <div class="sa-loader"></div>
+                <p>Cargando usuarios...</p>
+              </div>
+            } @else {
+              <!-- Desktop Table View -->
+              <div class="sa-table-wrap sa-desktop-only">
+                <table class="sa-table">
+                  <thead>
+                    <tr>
+                      <th>Usuario</th>
+                      <th>Rol</th>
+                      <th>Estado</th>
+                      <th class="sa-text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (user of paginatedUsers(); track user.id) {
+                      <tr>
+                        <td>
+                          <div class="sa-user-info">
+                            <span class="sa-user-avatar">{{ user.name.charAt(0) }}</span>
+                            <div class="sa-user-details">
+                              <span class="sa-user-name">{{ user.name }}</span>
+                              <span class="sa-user-email">{{ user.email }}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span class="sa-role-badge" [attr.data-role]="user.role">{{ user.role }}</span>
+                        </td>
+                        <td>
+                          <select 
+                            class="sa-status-select" 
+                            [value]="user.status" 
+                            (change)="updateUserStatus(user, $any($event.target).value)"
+                            [attr.data-status]="user.status">
+                            <option value="ACTIVE">ACTIVO</option>
+                            <option value="INACTIVE">INACTIVO</option>
+                            <option value="SUSPENDED">SUSPENDIDO</option>
+                          </select>
+                        </td>
+                        <td class="sa-text-right">
+                          <button 
+                            class="sa-btn sa-btn--sm sa-btn--ghost sa-btn--danger" 
+                            (click)="deleteUser(user.id)"
+                            title="Eliminar Usuario">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mobile Card View -->
+              <div class="sa-mobile-only sa-user-cards">
+                @for (user of paginatedUsers(); track user.id) {
+                  <div class="sa-user-card">
+                    <div class="sa-user-card__header">
+                      <div class="sa-user-info">
+                        <span class="sa-user-avatar">{{ user.name.charAt(0) }}</span>
+                        <div class="sa-user-details">
+                          <span class="sa-user-name">{{ user.name }}</span>
+                          <span class="sa-user-email">{{ user.email }}</span>
+                        </div>
+                      </div>
+                      <button 
+                        class="sa-btn sa-btn--sm sa-btn--ghost sa-btn--danger" 
+                        (click)="deleteUser(user.id)">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="sa-user-card__body">
+                      <div class="sa-card-field">
+                        <label>Rol</label>
+                        <span class="sa-role-badge" [attr.data-role]="user.role">{{ user.role }}</span>
+                      </div>
+                      <div class="sa-card-field">
+                        <label>Estado</label>
+                        <select 
+                          class="sa-status-select" 
+                          [value]="user.status" 
+                          (change)="updateUserStatus(user, $any($event.target).value)"
+                          [attr.data-status]="user.status">
+                          <option value="ACTIVE">ACTIVO</option>
+                          <option value="INACTIVE">INACTIVO</option>
+                          <option value="SUSPENDED">SUSPENDIDO</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              @if (orgUsers().length === 0) {
+                <p class="sa-empty">No se encontraron usuarios</p>
+              }
+            }
+          </div>
+
+          <!-- Modal Footer with Pagination -->
+          @if (orgUsers().length > 0) {
+            <div class="sa-modal__footer">
+              <span class="sa-muted text-xs">Mostrando {{ paginatedUsers().length }} de {{ orgUsers().length }} usuarios</span>
+              <div class="sa-pagination">
+                <button 
+                  class="sa-btn sa-btn--sm sa-btn--ghost" 
+                  [disabled]="currentPage() === 1"
+                  (click)="prevPage()">
+                  Anterior
+                </button>
+                <span class="sa-page-info">Página {{ currentPage() }} de {{ totalPages() }}</span>
+                <button 
+                  class="sa-btn sa-btn--sm sa-btn--ghost" 
+                  [disabled]="currentPage() === totalPages()"
+                  (click)="nextPage()">
+                  Siguiente
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Create Org Modal Overlay -->
+    @if (showCreateOrg()) {
+      <div class="sa-modal-overlay" (click)="showCreateOrg.set(false)">
+        <div class="sa-modal" (click)="$event.stopPropagation()" style="max-width: 500px; height: auto;">
+          <div class="sa-modal__header">
+            <div class="sa-modal__title">
+              <div class="sa-modal__header-text">
+                <h2>Crear Organización</h2>
+                <p class="sa-muted text-sm">Registrar nueva empresa</p>
+              </div>
+            </div>
+            <button class="sa-btn sa-btn--ghost sa-btn--icon" (click)="showCreateOrg.set(false)">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <div class="sa-modal__content" style="padding: 24px;">
+            <div class="sa-form-grid" style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="sa-field">
+                <label>Nombre</label>
+                <input type="text" [(ngModel)]="newOrg.name" placeholder="Nombre de la organización">
+              </div>
+              <div class="sa-field">
+                <label>Slug (subdominio)</label>
+                <input type="text" [(ngModel)]="newOrg.slug" placeholder="mi-empresa">
+              </div>
+              <div class="sa-field">
+                <label>Email del Admin</label>
+                <input type="email" [(ngModel)]="newOrg.adminEmail" placeholder="admin@empresa.com">
+              </div>
+              <div class="sa-field">
+                <label>Nombre del Admin</label>
+                <input type="text" [(ngModel)]="newOrg.adminName" placeholder="Administrador">
+              </div>
+              <div class="sa-field">
+                <label>Contraseña del Admin</label>
+                <input type="password" [(ngModel)]="newOrg.adminPassword" placeholder="••••••••">
+              </div>
+            </div>
+            @if (createError()) {
+              <p class="sa-error" style="margin-top: 16px;">{{ createError() }}</p>
+            }
+          </div>
+
+          <div class="sa-modal__footer" style="justify-content: flex-end; gap: 12px; display: flex;">
+            <button class="sa-btn sa-btn--ghost" (click)="showCreateOrg.set(false)">Cancelar</button>
+            <button class="sa-btn sa-btn--primary" (click)="createOrg()" [disabled]="isCreating()">
+              {{ isCreating() ? 'Creando...' : 'Crear Organización' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
   `,
   styles: [`
     :host { display: block; min-height: 100vh; background: #12131a; color: #e3e1eb; font-family: 'Inter', sans-serif; }
@@ -227,15 +468,6 @@ import { AuditLogService, AuditLogEntry } from '../../core/api/audit-log.service
     .sa-card__value { font-size: 2rem; font-weight: 700; color: #fff; line-height: 1; }
     .sa-card__label { font-size: 0.85rem; color: #8e909f; margin-top: 6px; font-weight: 500; }
 
-    /* Grid */
-    .sa-grid { display: grid; grid-template-columns: 2fr 1.2fr; gap: 24px; }
-    @media (max-width: 1024px) { .sa-grid { grid-template-columns: 1fr; } }
-
-    /* Panels */
-    .sa-panel {
-      background: #1e1f26; border: 1px solid #444653; border-radius: 8px;
-      padding: 24px; overflow: hidden;
-    }
     .sa-panel__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .sa-panel__header h2 { font-size: 1.125rem; font-weight: 700; color: #fff; margin: 0; letter-spacing: -0.01em; }
 
@@ -300,20 +532,168 @@ import { AuditLogService, AuditLogEntry } from '../../core/api/audit-log.service
     .sa-log-list::-webkit-scrollbar-track { background: transparent; }
     .sa-log-list::-webkit-scrollbar-thumb { background: #444653; border-radius: 3px; }
     .sa-log-list::-webkit-scrollbar-thumb:hover { background: #8e909f; }
+
+    /* Modal */
+    .sa-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
+    }
+    .sa-modal {
+      background: #1e1f26; border: 1px solid #444653; border-radius: 20px;
+      width: 95%; max-width: 850px; height: 90vh; max-height: 800px;
+      display: flex; flex-direction: column;
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6); overflow: hidden;
+      position: relative;
+    }
+    .sa-modal__header {
+      padding: 24px; border-bottom: 1px solid #444653;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      background: rgba(30, 31, 38, 0.5);
+    }
+    .sa-modal__title { display: flex; align-items: center; gap: 16px; width: 100%; }
+    .sa-modal__title h2 { margin: 0; font-size: 1.15rem; color: #fff; font-weight: 700; letter-spacing: -0.01em; }
+    .sa-modal__header-text { display: flex; flex-direction: column; }
+    .sa-org-avatar--lg { width: 44px; height: 44px; font-size: 1.1rem; border-radius: 12px; }
+
+    .sa-modal__filters {
+      padding: 16px 24px; background: #1a1b22; border-bottom: 1px solid #444653;
+      display: flex; gap: 24px; flex-wrap: wrap;
+    }
+    .sa-field--inline { display: flex; align-items: center; gap: 12px; }
+    .sa-field--inline label { margin-bottom: 0; white-space: nowrap; font-size: 0.75rem; }
+    .sa-field--inline select {
+      background: #12131a; border: 1px solid #444653; color: #e3e1eb;
+      height: 34px; border-radius: 8px; padding: 0 10px; font-size: 0.8rem; outline: none;
+    }
+
+    .sa-modal__content { padding: 0; flex: 1; overflow-y: auto; background: #1e1f26; }
+    
+    /* Responsive View Handling */
+    .sa-desktop-only { display: block !important; }
+    .sa-mobile-only { display: none !important; }
+
+    @media (max-width: 768px) {
+      .sa-desktop-only { display: none !important; }
+      .sa-mobile-only { display: block !important; }
+      .sa-modal { height: 95vh; max-height: none; width: 98%; }
+      .sa-modal__header { flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+      .sa-modal__title { flex-direction: column; text-align: center; }
+      .sa-modal__filters { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 16px; 
+        padding: 20px; 
+      }
+      .sa-field--inline { flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+      .sa-field--inline select { width: 100%; text-align: center; }
+      .sa-btn-actualizar { grid-column: span 2; display: flex; justify-content: center; width: 100%; }
+      .sa-modal__footer { flex-direction: column; gap: 16px; text-align: center; }
+    }
+
+    /* Mobile Cards */
+    .sa-user-cards { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+    .sa-user-card { 
+      background: #1a1b22; border: 1px solid #444653; border-radius: 16px;
+      overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .sa-user-card__header {
+      padding: 16px 20px; background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid #444653; display: flex; justify-content: space-between; align-items: center;
+    }
+    .sa-user-card__body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .sa-card-field { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .sa-card-field:last-child { border-bottom: none; }
+    .sa-card-field label { font-size: 0.7rem; color: #8e909f; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Footer & Pagination */
+    .sa-modal__footer {
+      padding: 16px 24px; border-top: 1px solid #444653; background: #1a1b22;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .sa-pagination { display: flex; align-items: center; gap: 16px; }
+    .sa-page-info { font-size: 0.8rem; color: #e3e1eb; font-weight: 500; }
+    
+    .text-xs { font-size: 0.75rem; }
+
+    /* Existing internal styles kept for consistency */
+    .sa-user-info { display: flex; align-items: center; gap: 12px; }
+    .sa-user-avatar {
+      width: 32px; height: 32px; border-radius: 8px; background: #33343c;
+      display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.8rem; color: #b8c4ff;
+    }
+    .sa-user-details { display: flex; flex-direction: column; }
+    .sa-user-name { font-weight: 600; color: #fff; font-size: 0.875rem; }
+    .sa-user-email { font-size: 0.75rem; color: #8e909f; }
+    
+    .sa-role-badge {
+      font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .sa-role-badge[data-role="ADMIN"] { background: rgba(30, 64, 175, 0.2); color: #b8c4ff; }
+    .sa-role-badge[data-role="MANAGER"] { background: rgba(21, 128, 61, 0.2); color: #4ade80; }
+    .sa-role-badge[data-role="OFFICER"] { background: rgba(217, 119, 6, 0.2); color: #fbbf24; }
+    .sa-role-badge[data-role="SUPER_ADMIN"] { background: rgba(147, 51, 234, 0.2); color: #d8b4fe; }
+
+    .sa-status-select {
+      background: transparent; border: 1px solid transparent; color: #fff;
+      font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 4px;
+      cursor: pointer; transition: all 0.2s; outline: none;
+    }
+    .sa-status-select:hover { border-color: #444653; background: #12131a; }
+    .sa-status-select[data-status="ACTIVE"] { color: #4ade80; }
+    .sa-status-select[data-status="INACTIVE"] { color: #f87171; }
+    .sa-status-select[data-status="SUSPENDED"] { color: #fbbf24; }
+
+    .sa-text-right { text-align: right; }
+    .sa-btn--icon { padding: 8px; border-radius: 8px; }
+    .sa-btn--danger:hover { color: #f87171; border-color: rgba(248, 113, 113, 0.3); background: rgba(248, 113, 113, 0.05); }
+
+    .sa-loader-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px; gap: 16px; color: #8e909f; }
+    .sa-loader {
+      width: 32px; height: 32px; border: 3px solid #444653; border-top-color: #1e40af;
+      border-radius: 50%; animation: sa-spin 0.8s linear infinite;
+    }
+    @keyframes sa-spin { to { transform: rotate(360deg); } }
   `]
 })
 export class SuperAdminDashboardComponent implements OnInit {
   authService = inject(AuthService);
   private orgService = inject(OrganizationService);
   private auditLogService = inject(AuditLogService);
+  private userService = inject(UserService);
   private router = inject(Router);
 
-  orgs       = signal<Organization[]>([]);
-  auditLogs  = signal<AuditLogEntry[]>([]);
+  orgs = signal<Organization[]>([]);
+  auditLogs = signal<AuditLogEntry[]>([]);
+
+  // Organization Users Modal
+  showUsersModal = signal(false);
+  selectedOrg = signal<Organization | null>(null);
+  orgUsers = signal<User[]>([]);
+  isLoadingUsers = signal(false);
+  selectedRole = signal('');
+  selectedStatus = signal('');
+
+  // Pagination (Frontend-only)
+  currentPage = signal(1);
+  pageSize = 15;
+
+  paginatedUsers = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    return this.orgUsers().slice(start, end);
+  });
+
+  totalPages = computed(() => {
+    const total = this.orgUsers().length;
+    return Math.ceil(total / this.pageSize);
+  });
 
   showCreateOrg = signal(false);
-  isCreating    = signal(false);
-  createError   = signal<string | null>(null);
+  isCreating = signal(false);
+  createError = signal<string | null>(null);
 
   newOrg = {
     name: '',
@@ -331,14 +711,14 @@ export class SuperAdminDashboardComponent implements OnInit {
   loadOrgs(): void {
     this.orgService.getOrganizations().subscribe({
       next: (data) => this.orgs.set(data),
-      error: () => {}
+      error: () => { }
     });
   }
 
   loadAuditLogs(): void {
     this.auditLogService.getGlobalLogs(0, 50).subscribe({
       next: (data) => this.auditLogs.set(data.content || []),
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -361,8 +741,78 @@ export class SuperAdminDashboardComponent implements OnInit {
   }
 
   viewOrgUsers(org: Organization): void {
-    // Future: navigate to org detail with users list
-    console.log('View users for:', org.slug);
+    this.selectedOrg.set(org);
+    this.showUsersModal.set(true);
+    this.loadOrgUsers();
+  }
+
+  loadOrgUsers(): void {
+    const org = this.selectedOrg();
+    if (!org) return;
+
+    this.isLoadingUsers.set(true);
+    const filters = {
+      orgId: org.id,
+      role: this.selectedRole() || undefined,
+      status: this.selectedStatus() || undefined
+    };
+
+    console.log('--- FETCHING USERS ---');
+    console.log('Filters being sent:', filters);
+    const token = localStorage.getItem('auth_token');
+    console.log('Auth Token Present:', !!token);
+
+    const manualUrl = `/api/users?orgId=${org.id}` +
+      (this.selectedRole() ? `&role=${this.selectedRole()}` : '') +
+      (this.selectedStatus() ? `&status=${this.selectedStatus()}` : '');
+    console.log('Manual URL check:', manualUrl);
+
+    this.userService.getUsers(filters).subscribe({
+      next: (users) => {
+        console.log('Response Success:', users);
+        this.orgUsers.set(users);
+        this.isLoadingUsers.set(false);
+        this.currentPage.set(1);
+      },
+      error: (err) => {
+        console.error('Response Error:', err);
+        this.isLoadingUsers.set(false);
+      }
+    });
+  }
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.update(p => p + 1);
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) {
+      this.currentPage.update(p => p - 1);
+    }
+  }
+
+  updateUserStatus(user: User, newStatus: string): void {
+    this.userService.updateUser(user.id, { status: newStatus }).subscribe({
+      next: () => this.loadOrgUsers()
+    });
+  }
+
+  deleteUser(userId: string): void {
+    if (confirm('¿Estás seguro de eliminar este usuario?')) {
+      this.userService.deleteUser(userId).subscribe({
+        next: () => this.loadOrgUsers()
+      });
+    }
+  }
+
+  closeUsersModal(): void {
+    this.showUsersModal.set(false);
+    this.selectedOrg.set(null);
+    this.orgUsers.set([]);
+    this.selectedRole.set('');
+    this.selectedStatus.set('');
   }
 
   logout(): void {

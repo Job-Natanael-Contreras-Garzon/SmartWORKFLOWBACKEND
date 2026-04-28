@@ -29,10 +29,8 @@ export class LoginComponent {
   /** El slug puede venir del TenantService (subdominio o query param) */
   detectedSlug = this.tenant.slug;
 
-  /** Input manual para cuando no hay tenant auto-detectado (dev) */
-  orgSlugInput = '';
-
   loginForm = this.fb.group({
+    orgSlug:  [this.tenant.slug() || ''],
     email:    ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(4)]]
   });
@@ -54,13 +52,10 @@ export class LoginComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    // En dev: usar el input manual si no hay tenant auto-detectado
-    const slug = this.detectedSlug() || (this.orgSlugInput.trim() || null);
-
     const body = {
       email:    this.loginForm.value.email,
       password: this.loginForm.value.password,
-      orgSlug:  slug   // null = SUPER_ADMIN login
+      orgSlug:  this.loginForm.value.orgSlug?.trim() || ''
     };
 
     this.http.post<LoginResponse>('/api/auth/login', body).subscribe({

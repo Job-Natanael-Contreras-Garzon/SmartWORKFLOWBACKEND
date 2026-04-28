@@ -1,5 +1,6 @@
 package com.example.smartworkflow.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,6 +19,7 @@ public class Department {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "org_id", nullable = false)
     private Organization organization;
@@ -28,10 +30,12 @@ public class Department {
     @Column(nullable = false, length = 50)
     private String code;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Department parent;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_user_id")
     private User manager;
