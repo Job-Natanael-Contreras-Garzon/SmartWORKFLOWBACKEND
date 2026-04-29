@@ -7,7 +7,7 @@
     </div>
     
     <div class="px-4 mb-6">
-      <button class="w-full bg-[#1e40af] text-white rounded-[8px] py-2.5 px-4 flex items-center justify-center gap-2 font-semibold hover:bg-[#1e3a8a] transition-all active:scale-[0.98] shadow-lg shadow-blue-900/20">
+      <button class="w-full bg-[#1e40af] text-white rounded-[8px] py-2.5 px-4 flex items-center justify-center gap-2 font-semibold hover:bg-[#1e3a8a] transition-all active:scale-[0.98] shadow-lg shadow-blue-900/20" routerLink="/admin/policy-editor">
         <span class="material-symbols-outlined text-[20px]">add</span>
         New Workflow
       </button>
@@ -20,7 +20,7 @@
       </a>
       <a class="text-[#c4c5d5] hover:bg-[#1a1b22] transition-colors flex items-center gap-3 px-3 py-2.5 rounded-[8px] group" routerLink="/admin/policy-editor">
         <span class="material-symbols-outlined text-[22px] text-[#8e909f] group-hover:text-[#b8c4ff]">account_tree</span>
-        <span class="text-sm font-medium">Policy Editor</span>
+        <span class="text-sm font-medium">Diagramador de Procesos</span>
       </a>
       <a class="text-[#c4c5d5] hover:bg-[#1a1b22] transition-colors flex items-center gap-3 px-3 py-2.5 rounded-[8px] group" routerLink="/officer">
         <span class="material-symbols-outlined text-[22px] text-[#8e909f] group-hover:text-[#b8c4ff]">assignment_turned_in</span>
@@ -70,11 +70,15 @@
         <div class="h-8 w-[1px] bg-[#444653]"></div>
         <div class="flex items-center gap-3 pl-2">
           <div class="text-right">
-            <div class="text-xs font-bold text-white leading-tight">Admin User</div>
-            <div class="text-[10px] text-[#8e909f] font-medium uppercase tracking-wider">Super Admin</div>
+            <div class="text-xs font-bold text-white leading-tight">{{ currentUser()?.name || 'Cargando...' }}</div>
+            <div class="text-[10px] text-[#8e909f] font-medium uppercase tracking-wider">{{ currentUser()?.role || 'Admin' }}</div>
           </div>
           <button class="w-10 h-10 rounded-full border-2 border-[#1e40af] overflow-hidden flex items-center justify-center bg-[#1e40af]/20">
-            <span class="material-symbols-outlined text-white">person</span>
+            @if (currentUser()?.avatarUrl) {
+              <img [src]="currentUser()?.avatarUrl" class="w-full h-full object-cover">
+            } @else {
+              <span class="material-symbols-outlined text-white">person</span>
+            }
           </button>
         </div>
       </div>
@@ -152,38 +156,38 @@
             <div class="bg-[#1e1f26] border border-[#444653] rounded-[8px] overflow-hidden">
               <div class="px-5 py-4 border-b border-[#444653] bg-[#1a1b22] flex justify-between items-center">
                 <h3 class="font-bold text-white text-xs uppercase tracking-wider">Organization Tree</h3>
-                <button class="p-1 text-[#8e909f] hover:text-white transition-colors">
-                  <span class="material-symbols-outlined text-[18px]">account_tree</span>
+                <button (click)="openDeptModal('create')" class="p-1 text-[#8e909f] hover:text-[#b8c4ff] transition-colors" title="Add Department">
+                  <span class="material-symbols-outlined text-[18px]">add_business</span>
                 </button>
               </div>
               <div class="p-4 space-y-2 text-sm">
-                <div class="flex items-center gap-2 p-2 bg-[#1e40af]/10 text-[#b8c4ff] rounded-[4px] cursor-pointer">
+                <div (click)="selectDepartment(null)" 
+                     class="flex items-center gap-2 p-2 rounded-[4px] cursor-pointer transition-all"
+                     [ngClass]="selectedDeptId() === null ? 'bg-[#1e40af]/20 text-[#b8c4ff] border border-[#1e40af]/30 font-bold' : 'text-[#c4c5d5] hover:bg-[#12131a]'">
                   <span class="material-symbols-outlined text-[18px]">corporate_fare</span>
-                  <span class="font-semibold">All Departments</span>
+                  <span>All Departments</span>
                 </div>
-                <div class="pl-4 space-y-1 mt-2">
-                  <div class="flex items-center gap-2 p-2 text-[#c4c5d5] hover:bg-[#12131a] rounded-[4px] cursor-pointer transition-colors">
-                    <span class="material-symbols-outlined text-[18px] text-[#8e909f]">expand_more</span>
-                    <span>Operations</span>
-                  </div>
-                  <div class="pl-6 space-y-1">
-                    <div class="flex items-center gap-2 p-2 text-[#c4c5d5] hover:text-white cursor-pointer group">
-                      <span class="w-1 h-1 bg-[#8e909f] rounded-full group-hover:bg-[#1e40af]"></span>
-                      <span>Logistics</span>
+                <div class="pl-4 space-y-1 mt-2 border-l border-[#444653]/30">
+                  @for (dept of departments(); track dept.id) {
+                    <div class="flex items-center justify-between p-2 rounded-[4px] transition-all group/dept"
+                         [ngClass]="selectedDeptId() === dept.id ? 'bg-[#1e40af]/10 text-[#b8c4ff] border-l-2 border-[#1e40af]' : 'text-[#c4c5d5] hover:bg-[#12131a]'">
+                      <div (click)="selectDepartment(dept.id)" class="flex items-center gap-2 cursor-pointer flex-1">
+                        <span class="material-symbols-outlined text-[18px]" [ngClass]="selectedDeptId() === dept.id ? 'text-[#b8c4ff]' : 'text-[#8e909f]'">domain</span>
+                        <span class="truncate">{{ dept.name }}</span>
+                      </div>
+                      <div class="flex gap-1 opacity-0 group-hover/dept:opacity-100 transition-opacity ml-2">
+                        <button (click)="openDeptModal('edit', dept); $event.stopPropagation()" class="text-[#8e909f] hover:text-[#b8c4ff] p-0.5">
+                          <span class="material-symbols-outlined text-[16px]">edit</span>
+                        </button>
+                        <button (click)="deleteDepartment(dept.id); $event.stopPropagation()" class="text-[#8e909f] hover:text-[#ffb4ab] p-0.5">
+                          <span class="material-symbols-outlined text-[16px]">delete</span>
+                        </button>
+                      </div>
                     </div>
-                    <div class="flex items-center gap-2 p-2 text-[#c4c5d5] hover:text-white cursor-pointer group">
-                      <span class="w-1 h-1 bg-[#8e909f] rounded-full group-hover:bg-[#1e40af]"></span>
-                      <span>Supply Chain</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2 p-2 text-[#c4c5d5] hover:bg-[#12131a] rounded-[4px] cursor-pointer transition-colors">
-                    <span class="material-symbols-outlined text-[18px] text-[#8e909f]">chevron_right</span>
-                    <span>Finance</span>
-                  </div>
-                  <div class="flex items-center gap-2 p-2 text-[#c4c5d5] hover:bg-[#12131a] rounded-[4px] cursor-pointer transition-colors">
-                    <span class="material-symbols-outlined text-[18px] text-[#8e909f]">chevron_right</span>
-                    <span>IT & Systems</span>
-                  </div>
+                  }
+                  @if (departments().length === 0) {
+                    <div class="text-[10px] text-[#8e909f] italic p-2 text-center">No departments defined.</div>
+                  }
                 </div>
               </div>
             </div>
@@ -332,73 +336,161 @@
 
 <!-- Create / Edit User Modal -->
 @if (modalOpen) {
-  <div class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="bg-[#1e1f26] border border-[#444653] rounded-[12px] shadow-2xl w-full max-w-lg p-8 m-4 relative">
-      <button (click)="closeModal()" class="absolute top-4 right-4 text-[#8e909f] hover:text-white transition-colors">
-        <span class="material-symbols-outlined">close</span>
-      </button>
+  <div class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[200] p-4">
+    <div class="bg-[#1e1f26] border border-[#444653] rounded-[24px] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
+      <div class="px-8 py-6 border-b border-[#444653] bg-[#1a1b22]/50 flex justify-between items-start">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-[12px] bg-gradient-to-br from-[#1e40af] to-[#3755c3] flex items-center justify-center shadow-lg shadow-blue-900/20">
+            <span class="material-symbols-outlined text-white text-[24px]">{{ modalMode === 'create' ? 'person_add' : 'manage_accounts' }}</span>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-white tracking-tight">{{ modalMode === 'create' ? 'Add New User' : 'Edit System User' }}</h2>
+            <p class="text-[#8e909f] text-xs font-medium uppercase tracking-wider mt-0.5">Identity & Access Control</p>
+          </div>
+        </div>
+        <button (click)="closeModal()" class="w-8 h-8 flex items-center justify-center text-[#8e909f] hover:text-white hover:bg-[#33343c] rounded-full transition-all">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
 
-      <h2 class="text-lg font-bold text-white mb-1">{{ modalMode === 'create' ? 'Add New User' : 'Edit User' }}</h2>
-      <p class="text-[#8e909f] text-xs mb-6">{{ modalMode === 'create' ? 'Fill in all required fields to create a new user account.' : 'Update the user details below.' }}</p>
+      <div class="p-8 space-y-6 overflow-y-auto custom-scrollbar max-h-[70vh]">
+        <div class="grid grid-cols-1 gap-6">
+          <!-- Name -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest flex items-center gap-2">
+              <span class="material-symbols-outlined text-[14px]">badge</span>
+              Full Name <span class="text-[#ffb4ab]">*</span>
+            </label>
+            <input [(ngModel)]="userForm.name" type="text" placeholder="e.g. Gerardo Rodríguez"
+                   class="w-full px-4 py-2.5 bg-[#12131a] border border-[#444653] rounded-[10px] text-sm text-white focus:outline-none focus:border-[#1e40af] focus:ring-1 focus:ring-[#1e40af] transition-all placeholder-[#444653] shadow-inner"/>
+          </div>
+          <!-- Email -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest flex items-center gap-2">
+              <span class="material-symbols-outlined text-[14px]">mail</span>
+              Corporate Email <span class="text-[#ffb4ab]">*</span>
+            </label>
+            <input [(ngModel)]="userForm.email" type="email" placeholder="gerardo@cre.com"
+                   class="w-full px-4 py-2.5 bg-[#12131a] border border-[#444653] rounded-[10px] text-sm text-white focus:outline-none focus:border-[#1e40af] focus:ring-1 focus:ring-[#1e40af] transition-all placeholder-[#444653] shadow-inner"/>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Role -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest flex items-center gap-2">
+                <span class="material-symbols-outlined text-[14px]">shield_person</span>
+                System Role <span class="text-[#ffb4ab]">*</span>
+              </label>
+              <div class="relative">
+                <select [(ngModel)]="userForm.role"
+                        class="w-full px-4 py-2.5 bg-[#12131a] border border-[#444653] rounded-[10px] text-sm text-white focus:outline-none focus:border-[#1e40af] transition-all appearance-none cursor-pointer">
+                  <option value="" disabled>Select role...</option>
+                  @for (r of roles; track r) {
+                    <option [value]="r">{{ r }}</option>
+                  }
+                </select>
+                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#8e909f] pointer-events-none">expand_more</span>
+              </div>
+            </div>
+            <!-- Department -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest flex items-center gap-2">
+                <span class="material-symbols-outlined text-[14px]">lan</span>
+                Department <span class="text-[#ffb4ab]">*</span>
+              </label>
+              <div class="relative">
+                <select [(ngModel)]="userForm.departmentId"
+                        class="w-full px-4 py-2.5 bg-[#12131a] border border-[#444653] rounded-[10px] text-sm text-white focus:outline-none focus:border-[#1e40af] transition-all appearance-none cursor-pointer">
+                  <option value="" disabled>Select dept...</option>
+                  @for (dept of departments(); track dept.id) {
+                    <option [value]="dept.id">{{ dept.name }}</option>
+                  }
+                </select>
+                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#8e909f] pointer-events-none">expand_more</span>
+              </div>
+            </div>
+          </div>
 
-      <div class="space-y-4">
-        <!-- Name -->
-        <div>
-          <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest block mb-1">Full Name <span class="text-[#ffb4ab]">*</span></label>
-          <input [(ngModel)]="userForm.name" type="text" placeholder="e.g. Jane Smith"
-                 class="w-full px-3 py-2 bg-[#12131a] border border-[#444653] rounded-[6px] text-sm text-white focus:outline-none focus:border-[#1e40af] transition-all placeholder-[#8e909f]"/>
-        </div>
-        <!-- Email -->
-        <div>
-          <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest block mb-1">Email <span class="text-[#ffb4ab]">*</span></label>
-          <input [(ngModel)]="userForm.email" type="email" placeholder="jane@company.com"
-                 class="w-full px-3 py-2 bg-[#12131a] border border-[#444653] rounded-[6px] text-sm text-white focus:outline-none focus:border-[#1e40af] transition-all placeholder-[#8e909f]"/>
-        </div>
-        <!-- Role -->
-        <div>
-          <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest block mb-1">Role <span class="text-[#ffb4ab]">*</span></label>
-          <select [(ngModel)]="userForm.role"
-                  class="w-full px-3 py-2 bg-[#12131a] border border-[#444653] rounded-[6px] text-sm text-white focus:outline-none focus:border-[#1e40af] transition-all appearance-none">
-            <option value="" disabled>Select a role...</option>
-            @for (r of roles; track r) {
-              <option [value]="r">{{ r }}</option>
-            }
-          </select>
-        </div>
-        <!-- Department -->
-        <div>
-          <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest block mb-1">Department <span class="text-[#ffb4ab]">*</span></label>
-          <select [(ngModel)]="userForm.departmentId"
-                  class="w-full px-3 py-2 bg-[#12131a] border border-[#444653] rounded-[6px] text-sm text-white focus:outline-none focus:border-[#1e40af] transition-all appearance-none">
-            <option value="" disabled>Select a department...</option>
-            @for (dept of departments(); track dept.id) {
-              <option [value]="dept.id">{{ dept.name }}</option>
-            }
-          </select>
-        </div>
-        <!-- Password -->
-        <div>
-          <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest block mb-1">
-            {{ modalMode === 'create' ? 'Password' : 'Password (leave blank to keep current)' }}
-            @if (modalMode === 'create') { <span class="text-[#ffb4ab]">*</span> }
-          </label>
-          <input [(ngModel)]="userForm.password" type="password" placeholder="••••••••"
-                 class="w-full px-3 py-2 bg-[#12131a] border border-[#444653] rounded-[6px] text-sm text-white focus:outline-none focus:border-[#1e40af] transition-all placeholder-[#8e909f]"/>
+          <!-- Password -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest flex items-center gap-2">
+              <span class="material-symbols-outlined text-[14px]">lock</span>
+              {{ modalMode === 'create' ? 'Account Password' : 'New Password (Optional)' }}
+              @if (modalMode === 'create') { <span class="text-[#ffb4ab]">*</span> }
+            </label>
+            <input [(ngModel)]="userForm.password" type="password" placeholder="••••••••"
+                   class="w-full px-4 py-2.5 bg-[#12131a] border border-[#444653] rounded-[10px] text-sm text-white focus:outline-none focus:border-[#1e40af] transition-all placeholder-[#444653] shadow-inner"/>
+          </div>
         </div>
       </div>
 
-      <div class="flex justify-end gap-3 mt-8">
-        <button (click)="closeModal()" class="px-4 py-2 border border-[#444653] text-[#8e909f] hover:text-white hover:bg-[#282a31] rounded-[6px] text-sm font-medium transition-all">
+      <div class="px-8 py-6 border-t border-[#444653] bg-[#1a1b22]/50 flex justify-end gap-3">
+        <button (click)="closeModal()" class="px-6 py-2.5 border border-[#444653] text-[#8e909f] hover:text-white hover:bg-[#33343c] rounded-[10px] text-sm font-bold uppercase tracking-wider transition-all">
           Cancel
         </button>
         <button (click)="saveUser()" [disabled]="!isFormValid() || isSubmitting"
-                class="px-5 py-2 bg-[#1e40af] text-white rounded-[6px] text-sm font-semibold hover:bg-[#1e3a8a] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-blue-900/30">
+                class="px-8 py-2.5 bg-[#1e40af] text-white rounded-[10px] text-sm font-bold uppercase tracking-wider hover:bg-[#1e3a8a] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-blue-900/30 active:scale-[0.98]">
           @if (isSubmitting) {
-            <span class="material-symbols-outlined animate-spin text-[16px]">sync</span>
-            Saving...
+            <span class="material-symbols-outlined animate-spin text-[18px]">sync</span>
+            Synchronizing...
           } @else {
-            {{ modalMode === 'create' ? 'Create User' : 'Save Changes' }}
+            <span class="material-symbols-outlined text-[18px]">{{ modalMode === 'create' ? 'check_circle' : 'save' }}</span>
+            {{ modalMode === 'create' ? 'Commit User' : 'Update Identity' }}
           }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Create / Edit Department Modal -->
+@if (deptModalOpen()) {
+  <div class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[200] p-4">
+    <div class="bg-[#1e1f26] border border-[#444653] rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
+      <div class="px-8 py-6 border-b border-[#444653] bg-[#1a1b22]/50 flex justify-between items-start">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-[12px] bg-gradient-to-br from-[#15803d] to-[#166534] flex items-center justify-center shadow-lg shadow-green-900/20">
+            <span class="material-symbols-outlined text-white text-[24px]">{{ deptModalMode() === 'create' ? 'add_business' : 'edit_square' }}</span>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-white tracking-tight">{{ deptModalMode() === 'create' ? 'New Department' : 'Modify Segment' }}</h2>
+            <p class="text-[#8e909f] text-xs font-medium uppercase tracking-wider mt-0.5">Structural Unit Definition</p>
+          </div>
+        </div>
+        <button (click)="closeDeptModal()" class="w-8 h-8 flex items-center justify-center text-[#8e909f] hover:text-white hover:bg-[#33343c] rounded-full transition-all">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="p-8 space-y-6">
+        <div class="space-y-6">
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest flex items-center gap-2">
+              <span class="material-symbols-outlined text-[14px]">domain</span>
+              Unit Name <span class="text-[#ffb4ab]">*</span>
+            </label>
+            <input [(ngModel)]="deptForm.name" type="text" placeholder="e.g. Logistics & Supply"
+                   class="w-full px-4 py-2.5 bg-[#12131a] border border-[#444653] rounded-[10px] text-sm text-white focus:outline-none focus:border-[#15803d] transition-all placeholder-[#444653] shadow-inner"/>
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest flex items-center gap-2">
+              <span class="material-symbols-outlined text-[14px]">description</span>
+              Functional Scope
+            </label>
+            <textarea [(ngModel)]="deptForm.description" rows="4" placeholder="Briefly define responsibilities..."
+                      class="w-full px-4 py-2.5 bg-[#12131a] border border-[#444653] rounded-[10px] text-sm text-white focus:outline-none focus:border-[#15803d] transition-all placeholder-[#444653] shadow-inner resize-none"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-8 py-6 border-t border-[#444653] bg-[#1a1b22]/50 flex justify-end gap-3">
+        <button (click)="closeDeptModal()" class="px-6 py-2.5 border border-[#444653] text-[#8e909f] hover:text-white hover:bg-[#33343c] rounded-[10px] text-sm font-bold uppercase tracking-wider transition-all">
+          Cancel
+        </button>
+        <button (click)="saveDepartment()" [disabled]="!deptForm.name"
+                class="px-8 py-2.5 bg-[#15803d] text-white rounded-[10px] text-sm font-bold uppercase tracking-wider hover:bg-[#166534] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-green-900/30 active:scale-[0.98]">
+          <span class="material-symbols-outlined text-[18px]">done_all</span>
+          {{ deptModalMode() === 'create' ? 'Register Unit' : 'Save Definition' }}
         </button>
       </div>
     </div>

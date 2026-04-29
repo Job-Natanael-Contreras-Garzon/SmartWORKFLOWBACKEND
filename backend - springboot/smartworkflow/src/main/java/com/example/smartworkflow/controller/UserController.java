@@ -1,11 +1,18 @@
 package com.example.smartworkflow.controller;
 
+import com.example.smartworkflow.dto.CreateUserRequest;
 import com.example.smartworkflow.dto.UserResponseDTO;
+import com.example.smartworkflow.entity.Department;
+import com.example.smartworkflow.entity.Organization;
 import com.example.smartworkflow.entity.User;
+import com.example.smartworkflow.repository.DepartmentRepository;
+import com.example.smartworkflow.repository.OrganizationRepository;
 import com.example.smartworkflow.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +25,9 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
+    private final DepartmentRepository departmentRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /** Helper para convertir User a UserResponseDTO */
     private UserResponseDTO toUserResponseDTO(User user) {
@@ -126,18 +136,55 @@ public class UserController {
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> createUser(
-            @RequestBody User user,
+            @Valid @RequestBody CreateUserRequest request,
             @RequestAttribute(value = "orgId", required = false) UUID requestOrgId,
             @RequestAttribute(value = "role", required = false) String userRole) {
-        
-        // Si no es SUPER_ADMIN, asegurar que el usuario se cree en su organización
-        if (!"SUPER_ADMIN".equals(userRole) && requestOrgId != null) {
-            if (user.getOrganization() == null || !user.getOrganization().getId().equals(requestOrgId)) {
+
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setRole(request.getRole());
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setStatus("ACTIVE");
+        user.setAvatarUrl(request.getAvatarUrl());
+
+        // Asignar organización
+        UUID targetOrgId = request.getOrgId();
+        if (targetOrgId == null && !"SUPER_ADMIN".equals(userRole)) {
+            targetOrgId = requestOrgId;
+        }
+
+        if (targetOrgId != null) {
+            Organization org = organizationRepository.findById(targetOrgId).orElse(null);
+            if (org == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            // Verificar permisos: si no es SUPER_ADMIN, solo puede crear en su org
+            if (!"SUPER_ADMIN".equals(userRole) && requestOrgId != null) {
+                if (!targetOrgId.equals(requestOrgId)) {
+                    return ResponseEntity.status(403).build();
+                }
+            }
+            user.setOrganization(org);
+        } else if (!"SUPER_ADMIN".equals(userRole)) {
+            // ADMIN debe especificar una organización (la suya)
+            return ResponseEntity.badRequest().build();
+        }
+
+        // Asignar departamento si se proporciona
+        if (request.getDepartmentId() != null) {
+            Department dept = departmentRepository.findById(request.getDepartmentId()).orElse(null);
+            if (dept == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            // Verificar que el departamento pertenece a la misma organización
+            if (user.getOrganization() != null &&
+                !dept.getOrganization().getId().equals(user.getOrganization().getId())) {
                 return ResponseEntity.status(403).build();
             }
+            user.setDepartment(dept);
         }
-        
-        user.setStatus("ACTIVE");
+
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(toUserResponseDTO(savedUser));
     }

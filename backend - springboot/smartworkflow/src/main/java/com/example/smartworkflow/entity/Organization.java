@@ -32,7 +32,7 @@ public class Organization {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private Map<String, Object> settings;
+    private Map<String, Object> settings = Map.of();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

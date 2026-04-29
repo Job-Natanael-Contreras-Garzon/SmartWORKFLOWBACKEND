@@ -156,6 +156,10 @@ import { UserService, User } from '../../core/api/user.service';
         <section class="sa-panel">
           <div class="sa-panel__header">
             <h2>Bitácora del Sistema</h2>
+            <div style="display: flex; gap: 8px;">
+               <button class="sa-btn sa-btn--ghost sa-btn--sm" (click)="openLocationModal()">📍 Ubicación</button>
+               <button class="sa-btn sa-btn--primary sa-btn--sm" (click)="openAuditModal()">Ver Todos</button>
+            </div>
           </div>
           <div class="sa-log-list">
             @for (log of auditLogs(); track log.id) {
@@ -410,6 +414,217 @@ import { UserService, User } from '../../core/api/user.service';
             <button class="sa-btn sa-btn--ghost" (click)="showCreateOrg.set(false)">Cancelar</button>
             <button class="sa-btn sa-btn--primary" (click)="createOrg()" [disabled]="isCreating()">
               {{ isCreating() ? 'Creando...' : 'Crear Organización' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Audit Modal Overlay -->
+    @if (showAuditModal()) {
+      <div class="sa-modal-overlay" (click)="closeAuditModal()">
+        <div class="sa-modal" (click)="$event.stopPropagation()">
+          <div class="sa-modal__header">
+            <div class="sa-modal__title">
+              <div class="sa-modal__header-text">
+                <h2>Registros de Auditoría</h2>
+                <p class="sa-muted">Vista detallada de eventos del sistema</p>
+              </div>
+            </div>
+            <button class="sa-btn sa-btn--ghost sa-btn--icon" (click)="closeAuditModal()">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <div class="sa-modal__filters">
+            <div class="sa-field sa-field--inline">
+              <label>Tipo</label>
+              <select [ngModel]="auditType()" (ngModelChange)="auditType.set($event); auditPage.set(0); loadDetailedAuditLogs()">
+                <option value="GLOBAL">Global</option>
+                <option value="SYSTEM">Sistema</option>
+              </select>
+            </div>
+            <div class="sa-field sa-field--inline">
+              <label>Acción</label>
+              <select [ngModel]="selectedAuditAction()" (ngModelChange)="selectedAuditAction.set($event); auditPage.set(0); loadDetailedAuditLogs()">
+                <option value="">Todas las Acciones</option>
+                @for (action of auditActions(); track action) {
+                  <option [value]="action">{{ action }}</option>
+                }
+              </select>
+            </div>
+            <div class="sa-btn-actualizar">
+              <button class="sa-btn sa-btn--primary" (click)="auditPage.set(0); loadDetailedAuditLogs()" [disabled]="isAuditLoading()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" [class.sa-spin]="isAuditLoading()">
+                  <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                Actualizar
+              </button>
+            </div>
+          </div>
+
+          <div class="sa-modal__content">
+            @if (isAuditLoading()) {
+              <div class="sa-loader-wrap">
+                <div class="sa-loader"></div>
+                <p>Cargando registros...</p>
+              </div>
+            } @else {
+              <!-- Desktop Table View -->
+              <div class="sa-table-wrap sa-desktop-only">
+                <table class="sa-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Acción / Entidad</th>
+                      <th>Detalles</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (log of detailedAuditLogs(); track log.id) {
+                      <tr>
+                        <td class="sa-muted">{{ log.createdAt | date:'dd/MM/yy HH:mm:ss' }}</td>
+                        <td>
+                          <div><span class="sa-log-badge" [attr.data-action]="log.action">{{ log.action }}</span></div>
+                          <div class="sa-muted text-xs" style="margin-top: 4px;">{{ log.entityType }}</div>
+                        </td>
+                        <td>
+                          <div class="text-xs sa-muted" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">
+                            @if (parseMetadata(log.metadata); as meta) {
+                              @if (meta.role) { <strong>Rol:</strong> {{ meta.role }} <br> }
+                              @if (meta.ipAddress) { <strong>IP:</strong> {{ meta.ipAddress }} <br> }
+                              @if (meta.userAgent) { <strong>UserAgent:</strong> {{ meta.userAgent }} }
+                            }
+                          </div>
+                        </td>
+                        <td>
+                           @if (parseMetadata(log.metadata); as meta) {
+                             @if (meta.success === true) {
+                               <span class="sa-status-select" data-status="ACTIVE">ÉXITO</span>
+                             } @else if (meta.success === false) {
+                               <span class="sa-status-select" data-status="INACTIVE">FALLO</span>
+                             }
+                           }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mobile Card View -->
+              <div class="sa-mobile-only sa-user-cards">
+                @for (log of detailedAuditLogs(); track log.id) {
+                  <div class="sa-user-card">
+                    <div class="sa-user-card__header">
+                      <div class="sa-user-info">
+                        <span class="sa-log-badge" [attr.data-action]="log.action">{{ log.action }}</span>
+                        <div class="sa-user-details">
+                          <span class="sa-user-name">{{ log.entityType }}</span>
+                          <span class="sa-user-email">{{ log.createdAt | date:'dd/MM/yy HH:mm' }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="sa-user-card__body">
+                      @if (parseMetadata(log.metadata); as meta) {
+                        @if (meta.role) {
+                          <div class="sa-card-field">
+                            <label>Rol</label>
+                            <span>{{ meta.role }}</span>
+                          </div>
+                        }
+                        @if (meta.success !== undefined) {
+                          <div class="sa-card-field">
+                            <label>Estado</label>
+                            <span class="sa-status-select" [attr.data-status]="meta.success ? 'ACTIVE' : 'INACTIVE'">
+                              {{ meta.success ? 'ÉXITO' : 'FALLO' }}
+                            </span>
+                          </div>
+                        }
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+
+              @if (detailedAuditLogs().length === 0) {
+                <p class="sa-empty">No se encontraron registros</p>
+              }
+            }
+          </div>
+
+          <!-- Modal Footer with Pagination -->
+          @if (detailedAuditLogs().length > 0) {
+            <div class="sa-modal__footer">
+              <span class="sa-muted text-xs">Total: {{ auditTotalElements() }} registros</span>
+              <div class="sa-pagination">
+                <button 
+                  class="sa-btn sa-btn--sm sa-btn--ghost" 
+                  [disabled]="auditPage() === 0"
+                  (click)="prevAuditPage()">
+                  Anterior
+                </button>
+                <span class="sa-page-info">Página {{ auditPage() + 1 }} de {{ auditTotalPages() || 1 }}</span>
+                <button 
+                  class="sa-btn sa-btn--sm sa-btn--ghost" 
+                  [disabled]="auditPage() >= auditTotalPages() - 1"
+                  (click)="nextAuditPage()">
+                  Siguiente
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Location Modal Overlay -->
+    @if (showLocationModal()) {
+      <div class="sa-modal-overlay" (click)="showLocationModal.set(false)">
+        <div class="sa-modal" (click)="$event.stopPropagation()" style="max-width: 400px; height: auto;">
+          <div class="sa-modal__header">
+            <div class="sa-modal__title">
+              <div class="sa-modal__header-text">
+                <h2>Registrar Ubicación</h2>
+                <p class="sa-muted text-sm">Enviar telemetría de ubicación</p>
+              </div>
+            </div>
+            <button class="sa-btn sa-btn--ghost sa-btn--icon" (click)="showLocationModal.set(false)">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <div class="sa-modal__content" style="padding: 24px;">
+            <div class="sa-form-grid" style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="sa-field">
+                <label>País</label>
+                <input type="text" [(ngModel)]="locationData.country" placeholder="Ej: Chile">
+              </div>
+              <div class="sa-field">
+                <label>Ciudad</label>
+                <input type="text" [(ngModel)]="locationData.city" placeholder="Ej: Santiago">
+              </div>
+              <div class="sa-field">
+                <label>Región / Estado</label>
+                <input type="text" [(ngModel)]="locationData.region" placeholder="Ej: RM">
+              </div>
+            </div>
+            @if (locationMessage()) {
+              <p class="sa-success" style="margin-top: 16px; color: #4ade80; background: rgba(74, 222, 128, 0.1); padding: 8px 12px; border-radius: 4px; font-size: 0.85rem; border-left: 3px solid #4ade80;">{{ locationMessage() }}</p>
+            }
+          </div>
+
+          <div class="sa-modal__footer" style="justify-content: flex-end; gap: 12px; display: flex;">
+            <button class="sa-btn sa-btn--ghost" (click)="showLocationModal.set(false)">Cerrar</button>
+            <button class="sa-btn sa-btn--primary" (click)="registerLocation()" [disabled]="isRegisteringLocation()">
+              {{ isRegisteringLocation() ? 'Registrando...' : 'Registrar' }}
             </button>
           </div>
         </div>
@@ -813,6 +1028,110 @@ export class SuperAdminDashboardComponent implements OnInit {
     this.orgUsers.set([]);
     this.selectedRole.set('');
     this.selectedStatus.set('');
+  }
+
+  // Audit Modal
+  showAuditModal = signal(false);
+  auditActions = signal<string[]>([]);
+  selectedAuditAction = signal('');
+  auditType = signal<'GLOBAL' | 'SYSTEM'>('GLOBAL');
+  auditPage = signal(0);
+  auditPageSize = 10;
+  auditTotalPages = signal(0);
+  auditTotalElements = signal(0);
+  detailedAuditLogs = signal<AuditLogEntry[]>([]);
+  isAuditLoading = signal(false);
+
+  // Location Modal
+  showLocationModal = signal(false);
+  locationData = { country: '', city: '', region: '' };
+  locationMessage = signal('');
+  isRegisteringLocation = signal(false);
+
+  openAuditModal(): void {
+    this.showAuditModal.set(true);
+    this.loadAuditActions();
+    this.loadDetailedAuditLogs();
+  }
+
+  closeAuditModal(): void {
+    this.showAuditModal.set(false);
+  }
+
+  loadAuditActions(): void {
+    this.auditLogService.getActions().subscribe({
+      next: (actions) => this.auditActions.set(actions)
+    });
+  }
+
+  loadDetailedAuditLogs(): void {
+    this.isAuditLoading.set(true);
+    const page = this.auditPage();
+    const size = this.auditPageSize;
+    const action = this.selectedAuditAction() || undefined;
+
+    const request$ = this.auditType() === 'GLOBAL' 
+      ? this.auditLogService.getGlobalLogs(page, size, action)
+      : this.auditLogService.getSystemLogs(page, size, action);
+
+    request$.subscribe({
+      next: (data) => {
+        this.detailedAuditLogs.set(data.content || []);
+        this.auditTotalPages.set(data.totalPages);
+        this.auditTotalElements.set(data.totalElements);
+        this.isAuditLoading.set(false);
+      },
+      error: () => {
+        this.isAuditLoading.set(false);
+      }
+    });
+  }
+
+  nextAuditPage(): void {
+    if (this.auditPage() < this.auditTotalPages() - 1) {
+      this.auditPage.update(p => p + 1);
+      this.loadDetailedAuditLogs();
+    }
+  }
+
+  prevAuditPage(): void {
+    if (this.auditPage() > 0) {
+      this.auditPage.update(p => p - 1);
+      this.loadDetailedAuditLogs();
+    }
+  }
+
+  openLocationModal(): void {
+    this.showLocationModal.set(true);
+    this.locationMessage.set('');
+    this.locationData = { country: '', city: '', region: '' };
+  }
+
+  registerLocation(): void {
+    this.isRegisteringLocation.set(true);
+    this.locationMessage.set('');
+    this.auditLogService.registerLocation(this.locationData).subscribe({
+      next: (res) => {
+        this.locationMessage.set(res.message || 'Ubicación registrada exitosamente');
+        this.isRegisteringLocation.set(false);
+      },
+      error: () => {
+        this.locationMessage.set('Error al registrar ubicación');
+        this.isRegisteringLocation.set(false);
+      }
+    });
+  }
+
+  parseMetadata(meta: string | any): any {
+    if (!meta) return null;
+    if (typeof meta === 'string') {
+      try {
+        return JSON.parse(meta);
+      } catch (e) {
+        return { raw: meta };
+      }
+    }
+    return meta;
   }
 
   logout(): void {

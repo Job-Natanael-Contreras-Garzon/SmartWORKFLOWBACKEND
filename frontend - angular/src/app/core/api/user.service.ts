@@ -9,6 +9,7 @@ export interface User {
   role: string;
   status: string;
   createdAt: string;
+  orgId?: string;
   departmentId?: string;
   password?: string;
   avatarUrl?: string | null;
@@ -17,6 +18,8 @@ export interface User {
   officer?: boolean;
   admin?: boolean;
   superAdmin?: boolean;
+  orgSlug?: string;
+  orgName?: string;
 }
 
 @Injectable({

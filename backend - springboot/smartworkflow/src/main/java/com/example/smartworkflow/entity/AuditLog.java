@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -38,6 +40,7 @@ public class AuditLog {
      * Acción realizada. Ejemplos:
      * CREATE_ORG, CREATE_USER, LOGIN, CREATE_CASE, UPDATE_POLICY, etc.
      */
+    
     @Column(nullable = false, length = 100)
     private String action;
 
@@ -54,6 +57,7 @@ public class AuditLog {
     private String ipAddress;
 
     /** Datos adicionales en formato JSON (antes/después, parámetros, etc.) */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String metadata;
 
