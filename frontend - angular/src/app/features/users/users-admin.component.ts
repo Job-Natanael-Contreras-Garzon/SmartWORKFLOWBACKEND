@@ -76,9 +76,11 @@ export class UsersAdminComponent implements OnInit {
   }
 
   loadUsers() {
+    console.log('Loading all organization users...');
     this.isLoading.set(true);
     this.userService.getUsers().subscribe({
       next: (data) => {
+        console.log('All users loaded:', data);
         this.users.set(data);
         this.isLoading.set(false);
       },
