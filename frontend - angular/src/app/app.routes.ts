@@ -9,6 +9,13 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { roles: ['SUPER_ADMIN'] }
   },
+  // ── ADMIN / MANAGER: diagramador de procesos ────────────────
+  {
+    path: 'policy-editor',
+    loadChildren: () => import('./features/policy-editor/policy.routes').then(m => m.policyRoutes),
+    canActivate: [roleGuard],
+    data: { roles: ['ADMIN', 'MANAGER'] }
+  },
   // ── ADMIN: gestión de la organización ────────────────────────
   {
     path: 'admin',

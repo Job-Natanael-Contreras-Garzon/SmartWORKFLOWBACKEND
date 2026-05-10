@@ -11,7 +11,7 @@
         <span class="material-symbols-outlined text-[22px] text-[#8e909f] group-hover:text-[#b8c4ff]">dashboard</span>
         <span class="text-sm font-medium">Overview</span>
       </a>
-      <a class="bg-[#1e1f26] text-[#b8c4ff] border-l-[3px] border-[#1e40af] flex items-center gap-3 px-3 py-2.5 rounded-r-[8px] shadow-md" routerLink="/admin/policy-editor">
+      <a class="bg-[#1e1f26] text-[#b8c4ff] border-l-[3px] border-[#1e40af] flex items-center gap-3 px-3 py-2.5 rounded-r-[8px] shadow-md" routerLink="/policy-editor">
         <span class="material-symbols-outlined text-[22px]">account_tree</span>
         <span class="text-sm font-semibold">Policy Editor</span>
       </a>
@@ -65,6 +65,9 @@
         <button (click)="validateGraph()" class="bg-[#1e1f26] border border-[#444653] text-[#e3e1eb] px-4 py-2 rounded-[8px] text-xs font-bold uppercase tracking-wider hover:bg-[#282a31] transition-all">
           Validar
         </button>
+        <button (click)="publishPolicy()" class="bg-[#15803d] text-white px-4 py-2 rounded-[8px] text-xs font-bold uppercase tracking-wider hover:bg-[#166534] transition-all">
+          Publicar
+        </button>
         <button (click)="saveToBackend()" class="bg-[#1e40af] text-white px-6 py-2 rounded-[8px] text-xs font-bold uppercase tracking-wider hover:bg-[#1e3a8a] transition-all shadow-lg shadow-blue-900/30">
           Guardar Cambios
         </button>
@@ -74,17 +77,32 @@
     <!-- Editor Workspace -->
     <div class="flex-1 flex overflow-hidden">
       <!-- Toolbox -->
-      <aside #dndContainer class="w-20 bg-[#0d0e14] border-r border-[#444653] flex flex-col items-center py-6 gap-6 shrink-0 z-10">
-        <div (mousedown)="startDrag($event, 'start')" class="w-10 h-10 bg-[#15803d]/20 border-2 border-[#4ade80] rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform" title="Inicio">
+      <aside #dndContainer class="w-20 bg-[#0d0e14] border-r border-[#444653] flex flex-col items-center py-6 gap-6 shrink-0 z-10 custom-scrollbar overflow-y-auto">
+        <div (mousedown)="startDrag($event, 'start')" class="w-10 h-10 bg-[#15803d]/20 border-2 border-[#4ade80] rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform shadow-lg shadow-green-900/20" title="Evento de Inicio">
           <span class="material-symbols-outlined text-[#4ade80] text-[20px]">play_arrow</span>
         </div>
-        <div (mousedown)="startDrag($event, 'task')" class="w-12 h-10 bg-[#1e40af]/20 border-2 border-[#1e40af] rounded-[4px] flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform" title="Tarea">
+        
+        <div (mousedown)="startDrag($event, 'task')" class="w-12 h-10 bg-[#1e40af]/20 border-2 border-[#1e40af] rounded-[4px] flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform shadow-lg shadow-blue-900/20" title="Tarea Manual">
           <span class="material-symbols-outlined text-[#b8c4ff] text-[20px]">assignment</span>
         </div>
-        <div (mousedown)="startDrag($event, 'gateway-xor')" class="w-10 h-10 bg-[#b45309]/20 border-2 border-[#ffb59a] rotate-45 flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform" title="Gateway XOR">
+
+        <div (mousedown)="startDrag($event, 'service-task')" class="w-12 h-10 bg-[#7c3aed]/20 border-2 border-[#a78bfa] rounded-[4px] flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform shadow-lg shadow-purple-900/20" title="Servicio Automático">
+          <span class="material-symbols-outlined text-[#c4b5fd] text-[20px]">settings_suggest</span>
+        </div>
+
+        <div (mousedown)="startDrag($event, 'gateway-xor')" class="w-10 h-10 bg-[#b45309]/20 border-2 border-[#ffb59a] rotate-45 flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform shadow-lg shadow-orange-900/20" title="Decisión (XOR)">
           <span class="material-symbols-outlined text-[#ffb59a] text-[18px] -rotate-45">call_split</span>
         </div>
-        <div (mousedown)="startDrag($event, 'end')" class="w-10 h-10 bg-[#991b1b]/20 border-2 border-[#ffb4ab] rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform" title="Fin">
+
+        <div (mousedown)="startDrag($event, 'gateway-and')" class="w-10 h-10 bg-[#0891b2]/20 border-2 border-[#67e8f9] rotate-45 flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform shadow-lg shadow-cyan-900/20" title="Paralelo (AND)">
+          <span class="material-symbols-outlined text-[#67e8f9] text-[18px] -rotate-45">add</span>
+        </div>
+
+        <div (mousedown)="startDrag($event, 'note')" class="w-12 h-8 bg-[#fef3c7] border border-[#f59e0b] rounded-[2px] flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform" title="Nota / Comentario">
+          <span class="material-symbols-outlined text-[#92400e] text-[18px]">sticky_note_2</span>
+        </div>
+
+        <div (mousedown)="startDrag($event, 'end')" class="w-10 h-10 bg-[#991b1b]/20 border-2 border-[#ffb4ab] rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing group hover:scale-110 transition-transform shadow-lg shadow-red-900/20" title="Evento de Fin">
           <span class="material-symbols-outlined text-[#ffb4ab] text-[20px]">stop</span>
         </div>
       </aside>
@@ -95,9 +113,9 @@
       </main>
 
       <!-- Properties Panel -->
-      <aside *ngIf="selectedNode || validationErrors.length > 0" class="w-80 bg-[#1a1b22] border-l border-[#444653] flex flex-col shrink-0 z-10">
+      <aside *ngIf="selectedNode() || validationErrors.length > 0" class="w-80 bg-[#1a1b22] border-l border-[#444653] flex flex-col shrink-0 z-10 shadow-2xl">
         <!-- Validation Errors -->
-        <ng-container *ngIf="!selectedNode && validationErrors.length > 0">
+        <ng-container *ngIf="!selectedNode() && validationErrors.length > 0">
           <div class="px-6 py-5 border-b border-[#444653] bg-[#0d0e14] flex items-center gap-3">
             <span class="material-symbols-outlined text-[#ffb4ab]">warning</span>
             <h3 class="font-bold text-white text-sm">Errores de Validación</h3>
@@ -112,27 +130,37 @@
         </ng-container>
 
         <!-- Node Properties -->
-        <ng-container *ngIf="selectedNode">
-          <div class="px-6 py-5 border-b border-[#444653] bg-[#0d0e14] flex items-center gap-3">
-            <span class="material-symbols-outlined text-[#b8c4ff]">tune</span>
-            <h3 class="font-bold text-white text-sm">Propiedades</h3>
+        <ng-container *ngIf="selectedNode()">
+          <div class="px-6 py-5 border-b border-[#444653] bg-[#0d0e14] flex items-center gap-3 justify-between">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-[#b8c4ff]">tune</span>
+              <h3 class="font-bold text-white text-sm">Propiedades</h3>
+            </div>
+            <button (click)="selectedNode().remove(); selectedNode.set(null)" class="text-[#ffb4ab] hover:text-red-500 transition-colors" title="Eliminar Elemento">
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+            </button>
           </div>
           <div class="p-6 space-y-6 overflow-y-auto custom-scrollbar">
             <div class="space-y-1">
-              <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest">Tipo de Nodo</label>
+              <label class="text-[10px] font-bold text-[#8e909f] uppercase tracking-widest">Tipo de Elemento</label>
               <div class="text-xs font-mono text-[#b8c4ff]">{{ nodeType }}</div>
             </div>
 
-            @if (nodeType === 'uml-task') {
-              <div class="space-y-4">
+            <div class="space-y-4">
+              <!-- Name & Description (All Nodes) -->
+              <div *ngIf="nodeType !== 'edge'" class="space-y-4">
                 <div class="space-y-1.5">
-                  <label class="text-[11px] font-semibold text-[#8e909f]">Nombre de la Tarea</label>
+                  <label class="text-[11px] font-semibold text-[#8e909f]">Título del Nodo</label>
                   <input type="text" [(ngModel)]="nodeData.name" (ngModelChange)="updateVisuals()" class="w-full bg-[#12131a] border border-[#444653] rounded-[8px] px-3 py-2 text-sm text-white focus:border-[#1e40af] outline-none">
                 </div>
                 <div class="space-y-1.5">
                   <label class="text-[11px] font-semibold text-[#8e909f]">Descripción</label>
                   <textarea [(ngModel)]="nodeData.description" (ngModelChange)="updateNodeData()" rows="3" class="w-full bg-[#12131a] border border-[#444653] rounded-[8px] px-3 py-2 text-sm text-white focus:border-[#1e40af] outline-none resize-none"></textarea>
                 </div>
+              </div>
+
+              <!-- Task Specific Properties -->
+              @if (nodeType === 'uml-task') {
                 <div class="space-y-1.5">
                   <label class="text-[11px] font-semibold text-[#8e909f]">Departamento Responsable</label>
                   <select [(ngModel)]="nodeData.department" (ngModelChange)="updateNodeData()" class="w-full bg-[#12131a] border border-[#444653] rounded-[8px] px-3 py-2 text-sm text-white focus:border-[#1e40af] outline-none">
@@ -147,8 +175,28 @@
                   <label class="text-[11px] font-semibold text-[#8e909f]">SLA (Horas)</label>
                   <input type="number" [(ngModel)]="nodeData.sla" (ngModelChange)="updateNodeData()" class="w-full bg-[#12131a] border border-[#444653] rounded-[8px] px-3 py-2 text-sm text-white focus:border-[#1e40af] outline-none">
                 </div>
-              </div>
-            }
+              }
+
+              <!-- Edge Properties -->
+              @if (nodeType === 'edge') {
+                <div class="space-y-1.5">
+                  <label class="text-[11px] font-semibold text-[#8e909f]">Expresión de Condición</label>
+                  <input type="text" [(ngModel)]="nodeData.conditionExpression" (ngModelChange)="updateVisuals()" placeholder="e.g. approved == true" class="w-full bg-[#12131a] border border-[#444653] rounded-[8px] px-3 py-2 text-sm text-white focus:border-[#1e40af] outline-none">
+                </div>
+                <div class="space-y-1.5">
+                  <label class="text-[11px] font-semibold text-[#8e909f]">Estilo de Línea</label>
+                  <select [(ngModel)]="nodeData.lineStyle" (ngModelChange)="updateVisuals()" class="w-full bg-[#12131a] border border-[#444653] rounded-[8px] px-3 py-2 text-sm text-white focus:border-[#1e40af] outline-none">
+                    <option value="solid">Sólida</option>
+                    <option value="dashed">Segmentada</option>
+                    <option value="dotted">Punteada</option>
+                  </select>
+                </div>
+                <div class="space-y-1.5">
+                  <label class="text-[11px] font-semibold text-[#8e909f]">Color de Conexión</label>
+                  <input type="color" [(ngModel)]="nodeData.strokeColor" (ngModelChange)="updateVisuals()" class="w-full h-8 bg-transparent border-none cursor-pointer">
+                </div>
+              }
+            </div>
           </div>
         </ng-container>
       </aside>

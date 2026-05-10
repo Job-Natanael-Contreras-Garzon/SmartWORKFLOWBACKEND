@@ -38,8 +38,8 @@ export class PolicyEditorComponent implements AfterViewInit, OnDestroy {
   canUndo = signal(false);
   canRedo = signal(false);
 
-  selectedNode: any = null;
-  nodeType: string = '';
+  selectedNode = signal<any>(null);
+  nodeType = '';
   nodeData: any = {};
   validationErrors: {id: string, message: string}[] = [];
 
@@ -79,10 +79,10 @@ export class PolicyEditorComponent implements AfterViewInit, OnDestroy {
               line: {
                 stroke: '#8e909f',
                 strokeWidth: 2,
-                targetMarker: { name: 'classic', size: 8 },
+                targetMarker: { name: 'block', size: 10, fill: '#8e909f' },
               },
             },
-            labels: [{ attrs: { label: { text: '', fill: '#e3e1eb' } } }],
+            labels: [{ attrs: { label: { text: '', fill: '#e3e1eb', fontSize: 11 } } }],
             tools: ['edge-editor', 'button-remove']
           });
         },
@@ -114,23 +114,60 @@ export class PolicyEditorComponent implements AfterViewInit, OnDestroy {
 
   private initEvents() {
     this.graph.on('selection:changed', ({ selected }) => {
-      if (selected.length === 1 && selected[0].isNode()) {
-        this.selectedNode = selected[0];
-        this.nodeType = this.selectedNode.shape;
-        const data = this.selectedNode.getData() || {};
+      // Remove tools from previously selected node if any
+      const prev = this.selectedNode();
+      if (prev && prev.isNode()) prev.removeTools();
 
-        if (this.nodeType === 'uml-task') {
+      if (selected.length === 1) {
+        const cell = selected[0];
+        this.selectedNode.set(cell);
+        this.nodeType = cell.shape;
+        const data = cell.getData() || {};
+
+        if (cell.isNode()) {
+          // Add remove tool to the selected node
+          cell.addTools(['button-remove']);
+
+          if (this.nodeType === 'uml-task') {
+            this.nodeData = {
+              name: cell.attr('label/text') || 'Nueva Tarea',
+              description: data.description || '',
+              department: data.department || '',
+              sla: data.sla || 0,
+              formId: data.formId || ''
+            };
+          } else {
+            this.nodeData = { ...data };
+          }
+        } else if (cell.isEdge()) {
+          this.nodeType = 'edge';
           this.nodeData = {
-            name: this.selectedNode.attr('label/text') || 'Nueva Tarea',
-            description: data.description || '',
-            department: data.department || '',
-            sla: data.sla || 0,
-            formId: data.formId || ''
+            conditionExpression: data.conditionExpression || cell.labels?.[0]?.attrs?.['label']?.['text'] || '',
+            lineStyle: data.lineStyle || 'solid',
+            strokeColor: cell.attr('line/stroke') || '#8e909f'
           };
         }
       } else {
-        this.selectedNode = null;
+        this.selectedNode.set(null);
         this.nodeType = '';
+      }
+    });
+
+    this.graph.on('node:mouseenter', ({ node }) => {
+      node.addTools(['button-remove']);
+      const ports = node.getPorts();
+      ports.forEach(port => {
+        node.setPortProp(port.id!, 'attrs/circle/style/visibility', 'visible');
+      });
+    });
+
+    this.graph.on('node:mouseleave', ({ node }) => {
+      if (this.selectedNode() !== node) {
+        node.removeTools();
+        const ports = node.getPorts();
+        ports.forEach(port => {
+          node.setPortProp(port.id!, 'attrs/circle/style/visibility', 'hidden');
+        });
       }
     });
 
@@ -140,16 +177,26 @@ export class PolicyEditorComponent implements AfterViewInit, OnDestroy {
     this.graph.on('edge:mouseleave', ({ edge }) => edge.removeTools());
   }
 
-  updateVisuals() {
-    if (this.selectedNode && this.nodeType === 'uml-task') {
-      this.selectedNode.attr('label/text', this.nodeData.name);
-      this.updateNodeData();
+  updateNodeData() {
+    const node = this.selectedNode();
+    if (node) {
+      node.setData({ ...this.nodeData }, { overwrite: true });
     }
   }
 
-  updateNodeData() {
-    if (this.selectedNode) {
-      this.selectedNode.setData({ ...this.nodeData }, { overwrite: true });
+  updateVisuals() {
+    const node = this.selectedNode();
+    if (node) {
+      if (node.isNode()) {
+        node.attr('label/text', this.nodeData.name);
+      } else if (node.isEdge()) {
+        node.setLabels([{ attrs: { label: { text: this.nodeData.conditionExpression } } }]);
+        const dashArray = this.nodeData.lineStyle === 'dashed' ? '5,5' : 
+                         this.nodeData.lineStyle === 'dotted' ? '2,2' : '';
+        node.attr('line/strokeDasharray', dashArray);
+        node.attr('line/stroke', this.nodeData.strokeColor);
+      }
+      this.updateNodeData();
     }
   }
 
@@ -157,71 +204,69 @@ export class PolicyEditorComponent implements AfterViewInit, OnDestroy {
   redo() { if (this.graph.canRedo()) this.graph.redo(); }
 
   saveToBackend() {
-    this.saveStatus.set('Guardando...');
-    const diagram = JSON.stringify(this.graph.toJSON());
-    
-    const policyData: Partial<Policy> = {
-      name: 'Nueva Política', // Podría pedirse al usuario
-      description: 'Diagrama de flujo de proceso',
-      diagramData: diagram,
-      isActive: true
-    };
-
-    if (this.currentPolicyId()) {
-      this.policyService.updatePolicy(this.currentPolicyId()!, policyData).subscribe({
-        next: (res: Policy) => {
-          this.saveStatus.set('Guardado');
-          this.toastr.success('Progreso guardado correctamente');
-        },
-        error: () => {
-          this.saveStatus.set('Error');
-          this.toastr.error('Error al guardar en el servidor');
-        }
-      });
-    } else {
-      this.policyService.createPolicy(policyData as Policy).subscribe({
-        next: (res: Policy) => {
-          this.currentPolicyId.set(res.id);
-          this.saveStatus.set('Guardado');
-          this.toastr.success('Política creada y guardada');
-        },
-        error: () => {
-          this.saveStatus.set('Error');
-          this.toastr.error('Error al crear la política');
-        }
-      });
+    if (!this.currentPolicyId()) {
+      this.toastr.warning('Por favor, crea una política primero o selecciona una existente.');
+      return;
     }
+
+    this.saveStatus.set('Guardando...');
+    const diagramPayload = this.transformToBackendFormat();
+    
+    // Guardamos el diagrama específico
+    this.policyService.saveDiagram(this.currentPolicyId()!, diagramPayload).subscribe({
+      next: () => {
+        // También guardamos el estado del canvas para poder recuperarlo (opcional, si el backend lo permite)
+        const canvasState = {
+          diagramData: JSON.stringify(this.graph.toJSON())
+        };
+        this.policyService.updatePolicy(this.currentPolicyId()!, canvasState).subscribe();
+
+        this.saveStatus.set('Guardado');
+        this.toastr.success('Diagrama guardado correctamente');
+      },
+      error: () => {
+        this.saveStatus.set('Error');
+        this.toastr.error('Error al guardar el diagrama');
+      }
+    });
   }
 
   validateGraph() {
-    this.validationErrors = [];
-    const nodes = this.graph.getNodes();
-    let hasStart = false;
-    let hasEnd = false;
+    if (!this.currentPolicyId()) return;
 
-    nodes.forEach(n => {
-      if (n.shape === 'uml-start') hasStart = true;
-      if (n.shape === 'uml-end') hasEnd = true;
-      if (n.shape === 'uml-task') {
-        const data = n.getData() || {};
-        if (!data.department) {
-          this.validationErrors.push({ id: n.id, message: `Falta departamento en "${n.attr('label/text')}"` });
+    this.validationErrors = [];
+    this.policyService.validatePolicy(this.currentPolicyId()!).subscribe({
+      next: (res) => {
+        if (res.valid) {
+          this.toastr.success('Estructura del proceso válida');
+        } else {
+          this.validationErrors = res.errors || [{ message: 'Error de validación desconocido' }];
+          this.toastr.error('El diagrama tiene errores de estructura');
         }
+      },
+      error: (err) => {
+        this.toastr.error('Error al conectar con el servicio de validación');
       }
     });
+  }
 
-    if (!hasStart) this.validationErrors.push({ id: 'none', message: 'Falta Evento de Inicio' });
-    if (!hasEnd) this.validationErrors.push({ id: 'none', message: 'Falta Evento de Fin' });
+  publishPolicy() {
+    if (!this.currentPolicyId()) return;
+    
+    if (!confirm('¿Estás seguro de publicar esta política? Una vez activa, se podrá usar para crear casos.')) return;
 
-    if (this.validationErrors.length === 0) {
-      this.toastr.success('Validación exitosa');
-    }
+    this.policyService.publishPolicy(this.currentPolicyId()!).subscribe({
+      next: () => {
+        this.toastr.success('Política publicada exitosamente');
+      },
+      error: () => this.toastr.error('Error al publicar la política. Verifica que sea válida.')
+    });
   }
 
   private registerCustomNodes() {
     const portAttrs = {
       circle: {
-        r: 4, magnet: true, stroke: '#1e40af', strokeWidth: 1, fill: '#fff', style: { visibility: 'hidden' },
+        r: 5, magnet: true, stroke: '#3b82f6', strokeWidth: 2, fill: '#1e1f26', style: { visibility: 'hidden' },
       },
     };
 
@@ -235,35 +280,115 @@ export class PolicyEditorComponent implements AfterViewInit, OnDestroy {
       items: [{ group: 'top' }, { group: 'right' }, { group: 'bottom' }, { group: 'left' }],
     };
 
+    // START Node
     Graph.registerNode('uml-start', {
-      inherit: 'circle', width: 40, height: 40,
-      attrs: { body: { fill: '#15803d', stroke: '#4ade80', strokeWidth: 2 } },
-      ports: { ...portsList }
-    });
-
-    Graph.registerNode('uml-task', {
-      inherit: 'rect', width: 120, height: 60,
+      inherit: 'circle', width: 42, height: 42,
       attrs: { 
-        body: { rx: 8, ry: 8, fill: '#1e1f26', stroke: '#1e40af', strokeWidth: 2 },
-        label: { text: 'Nueva Tarea', fill: '#e3e1eb', fontSize: 12, fontWeight: 'bold' }
+        body: { fill: '#15803d', stroke: '#4ade80', strokeWidth: 2 },
+        label: { text: '', fill: '#e3e1eb', fontSize: 11, refY: '120%' },
+        text: { text: '\ue037', fontAttributes: 'normal normal normal 20px/1 "Material Symbols Outlined"', fill: '#fff', refX: 0.5, refY: 0.5, textAnchor: 'middle', textVerticalAnchor: 'middle' }
       },
       ports: { ...portsList }
     });
 
+    // TASK Node
+    Graph.registerNode('uml-task', {
+      inherit: 'rect', width: 140, height: 70,
+      attrs: { 
+        body: { rx: 6, ry: 6, fill: '#1e1f26', stroke: '#1e40af', strokeWidth: 2 },
+        label: { text: 'Nueva Tarea', fill: '#e3e1eb', fontSize: 12, fontWeight: 'bold', refY: 0.6 },
+        text: { text: '\ue85d', fontAttributes: 'normal normal normal 18px/1 "Material Symbols Outlined"', fill: '#b8c4ff', refX: 0.5, refY: 0.3, textAnchor: 'middle', textVerticalAnchor: 'middle' }
+      },
+      ports: { ...portsList }
+    });
+
+    // CONDITION (XOR Gateway) Node
     Graph.registerNode('uml-gateway-xor', {
       inherit: 'polygon', width: 50, height: 50,
       attrs: { 
         body: { points: '25,0 50,25 25,50 0,25', fill: '#1e1f26', stroke: '#b45309', strokeWidth: 2 },
-        label: { text: 'X', fontSize: 16, fill: '#ffb59a', fontWeight: 'bold' }
+        label: { text: '', fill: '#e3e1eb', fontSize: 11, refY: '120%' },
+        text: { text: '\ue547', fontAttributes: 'normal normal normal 18px/1 "Material Symbols Outlined"', fill: '#ffb59a', refX: 0.5, refY: 0.5, textAnchor: 'middle', textVerticalAnchor: 'middle' }
       },
       ports: { ...portsList }
     });
 
-    Graph.registerNode('uml-end', {
-      inherit: 'circle', width: 40, height: 40,
-      attrs: { body: { fill: '#991b1b', stroke: '#ffb4ab', strokeWidth: 4 } },
+    // PARALLEL (AND Gateway) Node
+    Graph.registerNode('uml-gateway-and', {
+      inherit: 'polygon', width: 50, height: 50,
+      attrs: { 
+        body: { points: '25,0 50,25 25,50 0,25', fill: '#1e1f26', stroke: '#0891b2', strokeWidth: 2 },
+        label: { text: '', fill: '#e3e1eb', fontSize: 11, refY: '120%' },
+        text: { text: '\ue145', fontAttributes: 'normal normal normal 20px/1 "Material Symbols Outlined"', fill: '#67e8f9', refX: 0.5, refY: 0.5, textAnchor: 'middle', textVerticalAnchor: 'middle' }
+      },
       ports: { ...portsList }
     });
+
+    // SERVICE TASK Node
+    Graph.registerNode('uml-service-task', {
+      inherit: 'rect', width: 140, height: 70,
+      attrs: { 
+        body: { rx: 6, ry: 6, fill: '#1e1f26', stroke: '#7c3aed', strokeWidth: 2 },
+        label: { text: 'Servicio Automático', fill: '#e3e1eb', fontSize: 12, fontWeight: 'bold', refY: 0.6 },
+        text: { text: '\ue869', fontAttributes: 'normal normal normal 18px/1 "Material Symbols Outlined"', fill: '#c4b5fd', refX: 0.5, refY: 0.3, textAnchor: 'middle', textVerticalAnchor: 'middle' }
+      },
+      ports: { ...portsList }
+    });
+
+    // ANNOTATION / NOTE Node
+    Graph.registerNode('uml-note', {
+      inherit: 'rect', width: 120, height: 50,
+      attrs: { 
+        body: { fill: '#fef3c7', stroke: '#f59e0b', strokeWidth: 1, strokeDasharray: '5,5' },
+        label: { text: 'Nota...', fill: '#92400e', fontSize: 11, refX: 0.5, refY: 0.5, textAnchor: 'middle', textVerticalAnchor: 'middle' }
+      },
+      ports: { ...portsList }
+    });
+
+    // END Node
+    Graph.registerNode('uml-end', {
+      inherit: 'circle', width: 42, height: 42,
+      attrs: { 
+        body: { fill: '#991b1b', stroke: '#ffb4ab', strokeWidth: 3 },
+        label: { text: '', fill: '#e3e1eb', fontSize: 11, refY: '120%' },
+        text: { text: '\ue047', fontAttributes: 'normal normal normal 20px/1 "Material Symbols Outlined"', fill: '#fff', refX: 0.5, refY: 0.5, textAnchor: 'middle', textVerticalAnchor: 'middle' }
+      },
+      ports: { ...portsList }
+    });
+  }
+
+  private transformToBackendFormat() {
+    const json = this.graph.toJSON();
+    const nodes: any = {};
+    const edges: any[] = [];
+
+    json.cells.forEach((cell: any) => {
+      if (cell.shape && cell.shape.startsWith('uml-')) {
+        let type = 'TASK';
+        if (cell.shape === 'uml-start') type = 'START';
+        if (cell.shape === 'uml-end') type = 'END';
+        if (cell.shape === 'uml-gateway-xor') type = 'CONDITION';
+        if (cell.shape === 'uml-gateway-and') type = 'PARALLEL';
+        if (cell.shape === 'uml-service-task') type = 'SERVICE_TASK';
+        if (cell.shape === 'uml-note') return;
+
+        nodes[cell.id] = {
+          id: cell.id,
+          type: type,
+          name: cell.attrs?.['label']?.['text'] || cell.attrs?.['text']?.['text'] || 'Node',
+          ...cell.data
+        };
+      } else if (cell.shape === 'edge') {
+        edges.push({
+          id: cell.id,
+          source: cell.source.cell,
+          target: cell.target.cell,
+          conditionExpression: cell.data?.conditionExpression || cell.labels?.[0]?.attrs?.['label']?.['text'] || ''
+        });
+      }
+    });
+
+    return { nodes, edges };
   }
 
   private initDnd() {
@@ -275,7 +400,10 @@ export class PolicyEditorComponent implements AfterViewInit, OnDestroy {
     switch (type) {
       case 'start': node = this.graph.createNode({ shape: 'uml-start' }); break;
       case 'task': node = this.graph.createNode({ shape: 'uml-task' }); break;
+      case 'service-task': node = this.graph.createNode({ shape: 'uml-service-task' }); break;
       case 'gateway-xor': node = this.graph.createNode({ shape: 'uml-gateway-xor' }); break;
+      case 'gateway-and': node = this.graph.createNode({ shape: 'uml-gateway-and' }); break;
+      case 'note': node = this.graph.createNode({ shape: 'uml-note' }); break;
       case 'end': node = this.graph.createNode({ shape: 'uml-end' }); break;
     }
     if (node) this.dnd.start(node, e);

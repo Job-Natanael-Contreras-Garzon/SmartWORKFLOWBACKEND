@@ -94,13 +94,24 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDepartmentData() {
-    // En un sistema real, deptId se obtiene del perfil del usuario logueado
-    // Por ahora simulamos o dejamos que los servicios manejen el contexto
-    this.deptService.getDepartmentMembers('placeholder-dept-id').subscribe({
+    const departmentId = this.auth.getDepartmentId();
+
+    if (!departmentId) {
+      this.toastr.warning('Este usuario no tiene un departamento asignado');
+      this.loadTasks();
+      return;
+    }
+
+    this.allTaskIds = ['unassignedList'];
+    this.deptService.getDepartmentMembers(departmentId).subscribe({
       next: (members: any[]) => {
         const mapped = members.map((m: any) => ({ id: m.id, name: m.name, tasks: [] }));
         this.officers.set(mapped);
         mapped.forEach((o: any) => this.allTaskIds.push('officerList-' + o.id));
+        this.loadTasks();
+      },
+      error: () => {
+        this.toastr.error('No se pudieron cargar los miembros del departamento');
         this.loadTasks();
       }
     });

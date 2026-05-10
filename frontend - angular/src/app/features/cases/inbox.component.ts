@@ -22,9 +22,9 @@ import { ToastrService } from 'ngx-toastr';
             <span class="material-symbols-outlined text-[22px] text-[#8e909f] group-hover:text-[#b8c4ff]">dashboard</span>
             <span class="text-sm font-medium">Overview</span>
           </a>
-          <a class="text-[#c4c5d5] hover:bg-[#1a1b22] transition-colors flex items-center gap-3 px-3 py-2.5 rounded-[8px] group" routerLink="/admin/policy-editor">
+          <a class="text-[#c4c5d5] hover:bg-[#1a1b22] transition-colors flex items-center gap-3 px-3 py-2.5 rounded-[8px] group" routerLink="/policy-editor">
             <span class="material-symbols-outlined text-[22px] text-[#8e909f] group-hover:text-[#b8c4ff]">account_tree</span>
-            <span class="text-sm font-medium">Policy Editor</span>
+            <span class="text-sm font-medium">Diagramador de Procesos</span>
           </a>
           <a class="bg-[#1e1f26] text-[#b8c4ff] border-l-[3px] border-[#1e40af] flex items-center gap-3 px-3 py-2.5 rounded-r-[8px] shadow-md" routerLink="/officer">
             <span class="material-symbols-outlined text-[22px]">assignment_turned_in</span>
@@ -129,8 +129,10 @@ export class InboxComponent implements OnInit {
   loadTasks() {
     this.isLoading.set(true);
     this.caseService.getTasks().subscribe({
-      next: (data: Task[]) => {
-        this.tasks.set(data);
+      next: (data: any) => {
+        // Handle both direct array and Spring Data Page object
+        const taskList = Array.isArray(data) ? data : (data?.content || []);
+        this.tasks.set(taskList);
         this.isLoading.set(false);
       },
       error: () => {
